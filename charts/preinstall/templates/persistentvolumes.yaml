@@ -1,0 +1,41 @@
+{{- if .Values.persistentVolumes.enabled }}
+
+{{- if .Values.persistentVolumes.minio.enabled }}
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: {{ .Values.persistentVolumes.minio.name }}
+spec:
+  capacity:
+    storage: {{ .Values.persistentVolumes.minio.size }}
+  accessModes:
+    - ReadWriteOnce
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: {{ $.Values.storageClass.name }}
+  hostPath:
+    path: {{ .Values.persistentVolumes.minio.path }}
+    type: DirectoryOrCreate
+{{- end }}
+
+{{- if .Values.persistentVolumes.vertica.enabled }}
+{{- range $i := until (int .Values.persistentVolumes.vertica.count) }}
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: {{ $.Values.persistentVolumes.vertica.baseName }}-{{ $i }}
+spec:
+  capacity:
+    storage: {{ $.Values.persistentVolumes.vertica.size }}
+  accessModes:
+    - ReadWriteOnce
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: {{ $.Values.storageClass.name }}
+  hostPath:
+    path: {{ $.Values.persistentVolumes.vertica.basePath }}-{{ $i }}
+    type: DirectoryOrCreate
+{{- end }}
+{{- end }}
+
+{{- end }}

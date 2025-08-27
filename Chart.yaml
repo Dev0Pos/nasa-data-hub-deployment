@@ -1,0 +1,34 @@
+apiVersion: v2
+name: nasa-data-hub
+description: A comprehensive data analytics platform for NASA EONET data processing and visualization
+type: application
+version: 0.1.0
+appVersion: "1.0.0"
+keywords:
+  - nasa
+  - data
+  - analytics
+  - eonet
+  - vertica
+  - metabase
+  - minio
+icon: https://raw.githubusercontent.com/Dev0Pos/nasa-data-hub-deployment/main/icon.png
+maintainers:
+  - name: Łukasz Pośpiech
+    email: lukasz.pospiech@devpos.pl
+home: https://github.com/Dev0Pos/nasa-data-hub-deployment
+sources:
+  - https://github.com/Dev0Pos/nasa-data-hub-deployment
+dependencies:
+  - name: preinstall
+    version: 0.1.0
+    repository: file://charts/preinstall
+  - name: minio
+    version: 17.0.21
+    repository: file://charts/minio
+  - name: verticadb-operator
+    version: 25.3.0-0
+    repository: file://charts/verticadb-operator
+  - name: metabase
+    version: 0.1.0
+    repository: file://charts/metabase

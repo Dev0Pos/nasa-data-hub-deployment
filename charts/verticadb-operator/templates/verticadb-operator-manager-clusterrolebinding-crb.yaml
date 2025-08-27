@@ -1,0 +1,14 @@
+{{- if .Values.controllers.enable -}}
+apiVersion: rbac.authorization.k8s.io/v1
+kind: {{ include "vdb-op.roleBindingKind" . }}
+metadata:
+  name: {{ include "vdb-op.name" . }}-manager-clusterrolebinding
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: {{ include "vdb-op.roleKind" . }}
+  name: {{ include "vdb-op.name" . }}-manager-role
+subjects:
+- kind: ServiceAccount
+  name: {{ include "vdb-op.serviceAccount" . }}
+  namespace: {{ .Release.Namespace }}
+{{- end }}

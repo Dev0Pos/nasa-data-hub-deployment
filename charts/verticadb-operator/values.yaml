@@ -1,0 +1,208 @@
+# (c) Copyright [2021-2024] Open Text.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# You may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# Default values for verticadb-operator.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+# -------------------------------------------------------------------------------
+# NOTE: Whenever changing default values in here, be sure to update the
+# README.md in this directory.  That file lists out the helm chart parameters
+# with the default values.
+# -------------------------------------------------------------------------------
+
+# To control the name of all of the objects created in the helm chart.
+# nameOverride: verticadb-operator
+
+image:
+  repo: docker.io
+  name: opentext/verticadb-operator:25.3.0-0
+  pullPolicy: IfNotPresent
+
+imagePullSecrets: null
+
+controllers:
+  # If true, the controllers will run watching for changes in any of the
+  # Vertica custom resources. Setting this to false and webhook.enabled to true
+  # will cause the manager to only serve webhook requests. This mode allows you
+  # to decouple the webhook from the controllers, allowing you to run them in
+  # different pods.
+  enable: true
+  # What is the scope of the controllers? Allowed options are: cluster or namespace.
+  # Two things happen when the controllers are scoped at the namespace level: we
+  # only setup watches for the namespace the operator is deployed in, and we will only
+  # grant Role/RoleBindings to the manager for deployed namespace.
+  scope: cluster
+  # Use this if you want to provide a custom burst size for event recording in the operator.
+  # Increasing this allows the controllers to record more events in a short period.
+  burstSize: 100
+  # Controls the maximum backoff requeue duration (in milliseconds) for the vdb controller.
+  # Default value is 1000 ms (1 second). Increase this value to reduce the requeue rate
+  # if you have multiple databases running and want a lower rate limit.
+  vdbMaxBackoffDuration: 1000
+  # Controls the maximum backoff requeue duration (in milliseconds) for the sandbox controller.
+  # Default value is 1000 ms (1 second). Increase this value to reduce the requeue rate
+  # if you have multiple sandboxes running and want a lower rate limit.
+  sandboxMaxBackoffDuration: 1000
+
+webhook:
+  # The webhook requires a TLS certificate to work. This parm defines how the
+  # cert is supplied. Valid values are:
+  # - internal: The certs are generated internally by the operator prior to
+  #      starting the managing controller. The generated cert is self-signed.
+  #      When it expires, the operator pod will need to be restarted in order
+  #      to generate a new certificate. This is the default.
+  # - cert-manager: The certs are generated using the cert-manager operator.
+  #      This operator needs to be deployed before deploying the operator. It
+  #      can be installed with this command:
+  #      kubectl apply -f https://github.com/jetstack/cert-manager/releases/download/v1.5.3/cert-manager.yaml
+  #
+  #      Deployment of this chart will create a self-signed cert. The advantage
+  #      of this over 'internal' is that cert-manager will automatically handle
+  #      private key rotation when the certificate is about to expire.
+  # - secret: The certs are created prior to installation of this chart and are
+  #      provided to the operator through a secret. This option gives you the
+  #      most flexibility as it is entirely up to you how the cert is created.
+  #      This option requires the webhook.tlsSecret option to be set. For
+  #      backwards compatibility, if webhook.tlsSecret is set, it is implicit
+  #      that this mode is selected.
+  certSource: internal
+  # Use this parameter if you want to provide your own cert. tlsSecret is a
+  # name of a secret in the same namespace the chart is being installed in.
+  # The secret must have the keys: tls.key and tls.crt. It can also include the
+  # key ca.crt. When that key is included the operator will patch it into the CA
+  # bundle in the webhook configuration.
+  #
+  # For backwards compatibility, if this is set, then 'certSource = secret' is
+  # implied.
+  tlsSecret: ""
+  # If true, the webhook will be enabled and its configuration is setup by the helm chart. 
+  # Setting this to false will disable the webhook. The webhook setup needs privileges to add 
+  # validatingwebhookconfiguration and mutatingwebhookconfiguration, both are cluster scoped. 
+  # If you do not have necessary privileges to add these configurations, then this option 
+  # can be used to skip that and still deploy the operator.
+  enable: true
+
+logging:
+  # level is the minimum logging level. Valid values are: debug, info, warn, and error
+  level: info
+
+# Controls the amount of concurrency within the operator to handle the various
+# CRs we have.
+reconcileConcurrency:
+  verticadb: 5
+  verticaautoscaler: 1
+  eventtrigger: 1
+  verticarestorepointsquery: 1
+  verticascrutinize: 1
+  sandboxconfigmap: 1
+  verticareplicator: 3
+
+# The resource requirements for the operator pod.  See this for more info:
+# https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
+# These defaults must be kept in sync with config/manifests/kustomization.yaml
+resources:
+  limits:
+    cpu: 100m
+    memory: 750Mi
+  requests:
+    cpu: 100m
+    memory: 20Mi
+
+# Add specific node selector labels to control where the server pod is scheduled.
+# If left blank then no selectors are added.
+# See: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#nodeselector
+# key: value
+nodeSelector: {}
+
+# Add any affinity or anti-affinity to the pod to control where it gets scheduled.
+# See: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#inter-pod-affinity-and-anti-affinity
+# podAffinity:
+#   requiredDuringSchedulingIgnoredDuringExecution:
+#   - labelSelector:
+#       matchExpressions:
+#       - key: security
+#         operator: In
+#         values:
+#         - S1
+#     topologyKey: topology.kubernetes.io/zone
+affinity: {}
+
+# PriorityClassName given to Pods of this StatefulSet
+# See: https://kubernetes.io/docs/concepts/configuration/pod-priority-preemption/#priorityclass
+priorityClassName: ""
+
+# Taints and tolerations.
+# See: https://kubernetes.io/docs/concepts/scheduling-eviction/taint-and-toleration/
+tolerations: []
+
+# Set this if you want to override the default name of the serviceaccount
+# serviceAccountNameOverride: ""
+
+# Annotations to be added to the serviceaccount that we create. This is a key/value map.
+serviceAccountAnnotations: {}
+
+prometheus:
+  # Controls exposing of the prometheus metrics endpoint.  Valid options are:
+  #
+  # EnableWithAuth: A new service object will be created that exposes the
+  #    metrics endpoint.  Access to the metrics are controlled by rbac rules.
+  #    The metrics endpoint will use the https scheme.
+  # EnableWithoutAuth: Like EnableWithAuth, this will create a service
+  #    object to expose the metrics endpoint.  However, there is no authority
+  #    checking when using the endpoint.  Anyone who had network access
+  #    endpoint (i.e. any pod in k8s) will be able to read the metrics.  The
+  #    metrics endpoint will use the http scheme.
+  # EnableWithTLS: Like EnableWithAuth, this will create a service
+  #    object to expose the metrics endpoint.  However, there is no authority
+  #    checking when using the endpoint.  People with network access to the
+  #    endpoint (i.e. any pod in k8s) and the correct certs can read the metrics.
+  #    The metrics endpoint will use the https scheme. 
+  #    It needs to be used with tlsSecret. If tlsSecret is not set, the behavior
+  #    will be similar to EnableWithoutAuth, except that the endpoint will use 
+  #    https schema.
+  # Disable: Prometheus metrics are not exposed at all.
+  expose: Disable
+
+  # If prometheus is exposed with an auth proxy (EnableWithAuth), use this
+  # parameter to control what certificates are used for the https endpoint. If
+  # this is empty, the operator will use a generated self-signed cert. When
+  # provided, the certificates can be used to authenticate with the metrics
+  # endpoint.
+  tlsSecret: ""
+
+  # This controls the creation of ClusterRole/ClusterRoleBinding to access
+  # the metrics endpoint.
+  createProxyRBAC: true
+
+# Pod security context configuration
+securityContext:
+  fsGroup: 65532
+  runAsGroup: 65532
+  runAsNonRoot: true
+  runAsUser: 65532
+  seccompProfile:
+    type: RuntimeDefault
+
+# Container-specific security context configuration
+# ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/
+containerSecurityContext:
+  allowPrivilegeEscalation: false
+  readOnlyRootFilesystem: true
+  capabilities:
+    drop:
+    - ALL
+
+keda:
+  # This controls the creation of ClusterRole rules for KEDA objects.
+  createRBACRules: true

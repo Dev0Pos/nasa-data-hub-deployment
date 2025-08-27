@@ -1,0 +1,42 @@
+{{- if .Values.verticadb.enabled }}
+apiVersion: vertica.com/v1
+kind: VerticaDB
+metadata:
+  name: {{ include "nasa-data-hub.fullname" . }}-vertica
+  namespace: {{ .Release.Namespace }}
+  annotations:
+    vertica.com/k-safety: "0"
+  labels:
+    {{- include "nasa-data-hub.labels" . | nindent 4 }}
+    app.kubernetes.io/component: database
+spec:
+  image: "{{ .Values.verticadb.image.repository }}:{{ .Values.verticadb.image.tag }}"
+  dbName: "{{ .Values.verticadb.database.name }}"
+  {{- if .Values.global.initPolicy }}
+  initPolicy: {{ .Values.global.initPolicy }}
+  {{- end }}
+  subclusters:
+  - name: primarysubcluster
+    size: {{ .Values.verticadb.replicaCount }}
+    type: primary
+    serviceName: {{ include "nasa-data-hub.fullname" . }}-vertica
+  communal:
+    path: "s3://nasa-data-hub-vertica"
+    endpoint: "http://{{ include "nasa-data-hub.fullname" . }}-minio:9000"
+    credentialSecret: "nasa-data-hub-vertica-creds"
+    region: ""
+    s3ServerSideEncryption: ""
+  local:
+    requestSize: {{ .Values.verticadb.persistence.size }}
+    {{- if .Values.verticadb.persistence.storageClass }}
+    storageClass: {{ .Values.verticadb.persistence.storageClass }}
+    {{- end }}
+  {{- with .Values.verticadb.securityContext }}
+  securityContext:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+  {{- with .Values.verticadb.podSecurityContext }}
+  podSecurityContext:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+{{- end }}

@@ -1,0 +1,15 @@
+{{- if eq .Values.webhook.certSource "cert-manager" }}
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: {{ include "vdb-op.name" . }}-serving-cert
+  namespace: {{ .Release.Namespace }}
+spec:
+  dnsNames:
+  - {{ include "vdb-op.name" . }}-webhook-service.{{ .Release.Namespace }}.svc
+  - {{ include "vdb-op.name" . }}-webhook-service.{{ .Release.Namespace }}.svc.cluster.local
+  issuerRef:
+    kind: Issuer
+    name: {{ include "vdb-op.name" . }}-selfsigned-issuer
+  secretName: {{ include "vdb-op.certSecret" . }}
+{{- end -}}

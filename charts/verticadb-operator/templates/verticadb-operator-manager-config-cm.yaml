@@ -1,0 +1,39 @@
+apiVersion: v1
+data:
+  WEBHOOK_CERT_SOURCE: {{ include "vdb-op.certSource" . }}
+  BROADCASTER_BURST_SIZE: {{ quote .Values.controllers.burstSize }}
+  CONCURRENCY_EVENTTRIGGER: {{ .Values.reconcileConcurrency.eventtrigger | quote }}
+  CONCURRENCY_SANDBOXCONFIGMAP: {{ .Values.reconcileConcurrency.sandboxconfigmap | quote }}
+  CONCURRENCY_VERTICAAUTOSCALER: {{ .Values.reconcileConcurrency.verticaautoscaler | quote }}
+  CONCURRENCY_VERTICADB: {{ .Values.reconcileConcurrency.verticadb | quote }}
+  CONCURRENCY_VERTICAREPLICATOR: {{ .Values.reconcileConcurrency.verticareplicator | quote }}
+  CONCURRENCY_VERTICARESTOREPOINTSQUERY: {{ .Values.reconcileConcurrency.verticarestorepointsquery | quote }}
+  CONCURRENCY_VERTICASCRUTINIZE: {{ .Values.reconcileConcurrency.verticascrutinize | quote }}
+  CONTROLLERS_ENABLED: {{ quote .Values.controllers.enable }}
+  CONTROLLERS_SCOPE: {{ quote .Values.controllers.scope }}
+  DEPLOY_WITH: helm
+  LOG_LEVEL: {{ quote .Values.logging.level }}
+  LOG_FILE_PATH: {{ default "" .Values.logging.filePath | quote }}
+  LOG_MAX_FILE_SIZE: {{ default "" .Values.logging.maxFileSize | quote }}
+  LOG_MAX_FILE_AGE: {{ default "" .Values.logging.maxFileAge | quote }}
+  LOG_MAX_FILE_ROTATION: {{ default "" .Values.logging.maxFileRotation | quote }}
+  DEV_MODE: {{ default "" .Values.logging.dev | quote }}
+{{- if hasPrefix "Enable" .Values.prometheus.expose }}
+  METRICS_ADDR:  "{{ if eq "EnableWithAuth" .Values.prometheus.expose }}0.0.0.0{{ end }}:8443"
+{{- else }}
+  METRICS_ADDR: "0"
+{{- end }}
+  METRICS_EXPOSE_MODE:  "{{ .Values.prometheus.expose }}"
+  METRICS_TLS_SECRET:  "{{ .Values.prometheus.tlsSecret }}"
+  PREFIX_NAME: {{ include "vdb-op.name" . }}
+  SANDBOX_MAX_BACKOFF_DURATION: {{ quote .Values.controllers.sandboxMaxBackoffDuration }}
+  VDB_MAX_BACKOFF_DURATION: {{ quote .Values.controllers.vdbMaxBackoffDuration }}
+  VERSION: 25.3.0-0
+  WEBHOOK_CERT_SECRET: {{ include "vdb-op.certSecret" . }}
+  WEBHOOKS_ENABLED: {{ quote .Values.webhook.enable }}
+kind: ConfigMap
+metadata:
+  labels:
+    control-plane: {{ include "vdb-op.name" . }}
+  name: {{ include "vdb-op.name" . }}-manager-config
+  namespace: {{ .Release.Namespace }}

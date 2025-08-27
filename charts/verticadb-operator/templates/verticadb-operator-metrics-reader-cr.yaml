@@ -1,0 +1,11 @@
+{{- if and (.Values.prometheus.createProxyRBAC) (ne .Values.prometheus.expose "Disable") -}}
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: {{ include "vdb-op.name" . }}-{{ include "vdb-op.metricsRbacPrefix" . }}metrics-reader
+rules:
+- nonResourceURLs:
+  - /metrics
+  verbs:
+  - get
+{{- end }}

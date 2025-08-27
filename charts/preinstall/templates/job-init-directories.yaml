@@ -1,0 +1,42 @@
+{{- if .Values.directories.enabled }}
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ include "preinstall.fullname" . }}-init-directories
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "preinstall.labels" . | nindent 4 }}
+spec:
+  template:
+    spec:
+      serviceAccountName: {{ include "preinstall.fullname" . }}-sa
+      containers:
+      - name: init-directories
+        image: busybox:1.35
+        command:
+        - /bin/sh
+        - -c
+        - |
+          mkdir -p {{ .Values.persistentVolumes.minio.path }}
+          {{- range $i := until (int .Values.persistentVolumes.vertica.count) }}
+          mkdir -p {{ $.Values.persistentVolumes.vertica.basePath }}-{{ $i }}
+          {{- end }}
+          chmod {{ .Values.directories.permissions }} {{ .Values.persistentVolumes.minio.path }}
+          {{- range $i := until (int .Values.persistentVolumes.vertica.count) }}
+          chmod {{ $.Values.directories.permissions }} {{ $.Values.persistentVolumes.vertica.basePath }}-{{ $i }}
+          chown -R 5000:5000 {{ $.Values.persistentVolumes.vertica.basePath }}-{{ $i }}
+          {{- end }}
+          echo "Directories created successfully"
+        securityContext:
+          runAsUser: 0
+        volumeMounts:
+        - name: host-path
+          mountPath: {{ .Values.directories.basePath }}
+      volumes:
+      - name: host-path
+        hostPath:
+          path: {{ .Values.directories.basePath }}
+          type: Directory
+      restartPolicy: Never
+  backoffLimit: 3
+{{- end }}
