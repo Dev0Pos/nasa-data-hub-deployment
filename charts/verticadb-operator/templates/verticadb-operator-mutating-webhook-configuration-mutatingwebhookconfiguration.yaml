@@ -1,0 +1,114 @@
+{{- if .Values.webhook.enable -}}
+apiVersion: admissionregistration.k8s.io/v1
+kind: MutatingWebhookConfiguration
+metadata:
+  annotations:
+{{- if eq .Values.webhook.certSource "cert-manager" }}
+    cert-manager.io/inject-ca-from: {{ .Release.Namespace }}/{{ include "vdb-op.name" . }}-serving-cert
+{{- else }}
+    {}
+{{- end }}
+  creationTimestamp: null
+  name: {{ include "vdb-op.name" . }}-mutating-webhook-configuration
+webhooks:
+- admissionReviewVersions:
+  - v1
+  clientConfig:
+    service:
+      name: {{ include "vdb-op.name" . }}-webhook-service
+      namespace: {{ .Release.Namespace }}
+      path: /mutate-vertica-com-v1-verticadb
+  failurePolicy: Fail
+  name: mverticadb.v1.kb.io
+  rules:
+  - apiGroups:
+    - vertica.com
+    apiVersions:
+    - v1
+    operations:
+    - CREATE
+    - UPDATE
+    resources:
+    - verticadbs
+  sideEffects: None
+- admissionReviewVersions:
+  - v1
+  clientConfig:
+    service:
+      name: {{ include "vdb-op.name" . }}-webhook-service
+      namespace: {{ .Release.Namespace }}
+      path: /mutate-vertica-com-v1-verticaautoscaler
+  failurePolicy: Fail
+  name: mverticaautoscaler.v1.kb.io
+  rules:
+  - apiGroups:
+    - vertica.com
+    apiVersions:
+    - v1
+    operations:
+    - CREATE
+    - UPDATE
+    resources:
+    - verticaautoscalers
+  sideEffects: None
+- admissionReviewVersions:
+  - v1
+  clientConfig:
+    service:
+      name: {{ include "vdb-op.name" . }}-webhook-service
+      namespace: {{ .Release.Namespace }}
+      path: /mutate-vertica-com-v1beta1-eventtrigger
+  failurePolicy: Fail
+  name: meventtrigger.kb.io
+  rules:
+  - apiGroups:
+    - vertica.com
+    apiVersions:
+    - v1beta1
+    operations:
+    - CREATE
+    - UPDATE
+    resources:
+    - eventtriggers
+  sideEffects: None
+- admissionReviewVersions:
+  - v1
+  clientConfig:
+    service:
+      name: {{ include "vdb-op.name" . }}-webhook-service
+      namespace: {{ .Release.Namespace }}
+      path: /mutate-vertica-com-v1beta1-verticarestorepointsquery
+  failurePolicy: Fail
+  name: mverticarestorepointsquery.kb.io
+  rules:
+  - apiGroups:
+    - vertica.com
+    apiVersions:
+    - v1beta1
+    operations:
+    - CREATE
+    - UPDATE
+    resources:
+    - verticarestorepointsqueries
+  sideEffects: None
+- admissionReviewVersions:
+  - v1
+  clientConfig:
+    service:
+      name: {{ include "vdb-op.name" . }}-webhook-service
+      namespace: {{ .Release.Namespace }}
+      path: /mutate-vertica-com-v1beta1-verticascrutinize
+  failurePolicy: Fail
+  name: mverticascrutinize.kb.io
+  rules:
+  - apiGroups:
+    - vertica.com
+    apiVersions:
+    - v1beta1
+    operations:
+    - CREATE
+    - UPDATE
+    resources:
+    - verticascrutinizers
+  sideEffects: None
+{{- end }}

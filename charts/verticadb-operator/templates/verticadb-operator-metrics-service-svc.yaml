@@ -1,0 +1,19 @@
+{{- if hasPrefix "Enable" .Values.prometheus.expose -}}
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app.kubernetes.io/managed-by: kustomize
+    app.kubernetes.io/name: {{ include "vdb-op.name" . }}
+    control-plane: {{ include "vdb-op.name" . }}
+  name: {{ include "vdb-op.name" . }}-metrics-service
+  namespace: {{ .Release.Namespace }}
+spec:
+  ports:
+  - name: https
+    port: 8443
+    protocol: TCP
+    targetPort: 8443
+  selector:
+    control-plane: {{ include "vdb-op.name" . }}
+{{- end }}

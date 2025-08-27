@@ -1,0 +1,115 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    control-plane: {{ include "vdb-op.name" . }}
+  name: {{ include "vdb-op.name" . }}-manager
+  namespace: {{ .Release.Namespace }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      control-plane: {{ include "vdb-op.name" . }}
+  template:
+    metadata:
+      annotations:
+        kubectl.kubernetes.io/default-container: manager
+      labels:
+        app.kubernetes.io/name: {{ include "vdb-op.name" . }}
+        control-plane: {{ include "vdb-op.name" . }}
+    spec:
+      containers:
+      - args:
+        - --metrics-bind-address=:8443
+        - --leader-elect
+        - --health-probe-bind-address=:8081
+        command:
+        - /manager
+        env:
+        - name: OPERATOR_NAMESPACE
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.namespace
+        envFrom:
+        - configMapRef:
+            name: {{ include "vdb-op.name" . }}-manager-config
+        image: '{{ with .Values.image }}{{ join "/" (list .repo .name) }}{{ end }}'
+        imagePullPolicy: {{ default "IfNotPresent" .Values.image.pullPolicy }}
+        livenessProbe:
+          httpGet:
+            path: /healthz
+            port: 8081
+          initialDelaySeconds: 15
+          periodSeconds: 20
+        name: manager
+        ports:
+        - containerPort: 9443
+          name: webhook-server
+          protocol: TCP
+{{- if hasPrefix "Enable" .Values.prometheus.expose }}
+        - name: metrics
+          containerPort: 8443
+          protocol: TCP
+{{- end }}
+        readinessProbe:
+          httpGet:
+            path: /readyz
+            port: 8081
+          initialDelaySeconds: 5
+          periodSeconds: 10
+        resources:
+          {{- toYaml .Values.resources | nindent 10 }}
+        securityContext: 
+{{ toYaml .Values.containerSecurityContext | indent 12 }}
+        volumeMounts:
+{{- if or (ne .Values.webhook.certSource "internal") (not (empty .Values.webhook.tlsSecret)) }}
+        - mountPath: /tmp/k8s-webhook-server/serving-certs
+          name: webhook-cert
+          readOnly: true
+{{- end }}
+        - mountPath: /tmp
+          name: tmp
+{{- if not (empty .Values.prometheus.tlsSecret) }}
+        - mountPath: /cert
+          name: auth-cert
+{{- end }}
+      securityContext: 
+{{ toYaml .Values.securityContext | indent 8 }}
+      serviceAccountName: {{ include "vdb-op.serviceAccount" . }}
+      terminationGracePeriodSeconds: 10
+      volumes:
+{{- if or (ne .Values.webhook.certSource "internal") (not (empty .Values.webhook.tlsSecret)) }}
+      - name: webhook-cert
+        secret:
+          defaultMode: 420
+          secretName: {{ include "vdb-op.certSecret" . }}
+{{- end }}
+{{- if not (empty .Values.prometheus.tlsSecret) }}
+      - name: auth-cert
+        secret:
+          defaultMode: 420
+          secretName: {{ .Values.prometheus.tlsSecret }}
+{{- end }}
+      - emptyDir:
+          medium: Memory
+          sizeLimit: 10Mi
+        name: tmp
+{{ if .Values.imagePullSecrets }}
+      imagePullSecrets:
+{{ .Values.imagePullSecrets | toYaml | indent 8 }}
+{{ end }}
+{{- if .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml .Values.nodeSelector | nindent 8 }}
+{{- end }}
+{{- if .Values.affinity }}
+      affinity:
+        {{- toYaml .Values.affinity | nindent 8 }}
+{{- end }}
+{{- if .Values.priorityClassName }}
+      priorityClassName: {{ .Values.priorityClassName }}
+{{- end }}
+{{- if .Values.tolerations }}
+      tolerations:
+        {{- toYaml .Values.tolerations | nindent 8 }}
+{{- end }}

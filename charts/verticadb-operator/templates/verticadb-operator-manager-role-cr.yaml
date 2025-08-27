@@ -1,0 +1,346 @@
+{{- if .Values.controllers.enable -}}
+apiVersion: rbac.authorization.k8s.io/v1
+kind: {{ include "vdb-op.roleKind" . }}
+metadata:
+  name: {{ include "vdb-op.name" . }}-manager-role
+rules:
+- apiGroups:
+  - ""
+  resources:
+  - configmaps
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - update
+  - watch
+- apiGroups:
+  - ""
+  resources:
+  - events
+  verbs:
+  - create
+  - patch
+- apiGroups:
+  - ""
+  resources:
+  - persistentvolumeclaims
+  verbs:
+  - get
+  - list
+  - update
+  - watch
+- apiGroups:
+  - ""
+  resources:
+  - pods
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - ""
+  resources:
+  - pods/exec
+  verbs:
+  - create
+- apiGroups:
+  - ""
+  resources:
+  - pods/status
+  verbs:
+  - update
+- apiGroups:
+  - ""
+  resources:
+  - secrets
+  verbs:
+  - create
+  - get
+  - list
+  - update
+  - watch
+- apiGroups:
+  - apps
+  resources:
+  - deployments
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - apps
+  resources:
+  - statefulsets
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - autoscaling
+  resources:
+  - horizontalpodautoscalers
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - batch
+  resources:
+  - jobs
+  verbs:
+  - create
+  - get
+  - list
+  - watch
+{{- if eq .Values.controllers.scope "cluster" }}
+- apiGroups:
+  - ""
+  resources:
+  - namespaces
+  verbs:
+  - get
+  - list
+  - watch
+{{- end }}
+- apiGroups:
+  - ""
+  resources:
+  - serviceaccounts
+  verbs:
+  - create
+  - get
+  - list
+  - watch
+- apiGroups:
+  - ""
+  resources:
+  - services
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+{{- if .Values.keda.createRBACRules }}
+- apiGroups:
+  - keda.sh
+  resources:
+  - scaledobjects
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+{{- end }}
+{{- if .Values.keda.createRBACRules }}
+- apiGroups:
+  - keda.sh
+  resources:
+  - triggerauthentications
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+{{- end }}
+- apiGroups:
+  - rbac.authorization.k8s.io
+  resources:
+  - rolebindings
+  verbs:
+  - create
+  - get
+  - list
+  - watch
+- apiGroups:
+  - rbac.authorization.k8s.io
+  resources:
+  - roles
+  verbs:
+  - create
+  - get
+  - list
+  - watch
+- apiGroups:
+  - vertica.com
+  resources:
+  - eventtriggers
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - vertica.com
+  resources:
+  - eventtriggers/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - vertica.com
+  resources:
+  - eventtriggers/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
+  - vertica.com
+  resources:
+  - verticaautoscalers
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - vertica.com
+  resources:
+  - verticaautoscalers/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - vertica.com
+  resources:
+  - verticaautoscalers/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
+  - vertica.com
+  resources:
+  - verticadbs
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - vertica.com
+  resources:
+  - verticadbs/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - vertica.com
+  resources:
+  - verticadbs/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
+  - vertica.com
+  resources:
+  - verticareplicators
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - vertica.com
+  resources:
+  - verticareplicators/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - vertica.com
+  resources:
+  - verticareplicators/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
+  - vertica.com
+  resources:
+  - verticarestorepointsqueries
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - vertica.com
+  resources:
+  - verticarestorepointsqueries/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - vertica.com
+  resources:
+  - verticarestorepointsqueries/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
+  - vertica.com
+  resources:
+  - verticascrutinizers
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - vertica.com
+  resources:
+  - verticascrutinizers/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - vertica.com
+  resources:
+  - verticascrutinizers/status
+  verbs:
+  - get
+  - patch
+  - update
+{{- end }}

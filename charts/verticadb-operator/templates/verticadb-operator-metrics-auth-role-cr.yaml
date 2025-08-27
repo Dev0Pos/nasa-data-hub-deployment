@@ -1,0 +1,19 @@
+{{- if and (.Values.prometheus.createProxyRBAC) (ne .Values.prometheus.expose "Disable") -}}
+apiVersion: rbac.authorization.k8s.io/v1
+kind: {{ include "vdb-op.roleKind" . }}
+metadata:
+  name: {{ include "vdb-op.name" . }}-{{ include "vdb-op.metricsRbacPrefix" . }}metrics-auth-role
+rules:
+- apiGroups:
+  - authentication.k8s.io
+  resources:
+  - tokenreviews
+  verbs:
+  - create
+- apiGroups:
+  - authorization.k8s.io
+  resources:
+  - subjectaccessreviews
+  verbs:
+  - create
+{{- end }}

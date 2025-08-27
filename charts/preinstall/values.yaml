@@ -1,0 +1,41 @@
+# Preinstall Infrastructure Configuration
+# This chart creates StorageClass and PersistentVolumes for NASA Data Hub
+
+# StorageClass Configuration
+storageClass:
+  enabled: true
+  name: "local-storage"
+  isDefault: true
+  provisioner: "kubernetes.io/no-provisioner"
+  volumeBindingMode: "WaitForFirstConsumer"
+
+# PersistentVolumes Configuration
+persistentVolumes:
+  enabled: true
+  
+  # MinIO PersistentVolume
+  minio:
+    enabled: true
+    name: "nasa-data-hub-minio-pv"
+    size: "100Gi"
+    path: "/tmp/nasa-data-hub-minio"
+    
+  # Vertica PersistentVolumes
+  vertica:
+    enabled: true
+    count: 1  # Number of PVs to create (integer)
+    size: "50Gi"
+    basePath: "/tmp/nasa-data-hub-vertica"
+    baseName: "nasa-data-hub-vertica-pv"
+
+# Directory Creation
+directories:
+  enabled: true
+  basePath: "/tmp"
+  permissions: "777"
+
+# MinIO Configuration (for VerticaDB secret)
+minio:
+  auth:
+    rootUser: "admin"
+    rootPassword: "nasa-data-hub-2024"

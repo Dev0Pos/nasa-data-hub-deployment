@@ -1,0 +1,141 @@
+# NASA Data Hub - Main Configuration
+# This chart deploys a complete data analytics platform for NASA EONET data
+
+# Global configuration
+global:
+  environment: production
+  namespaceOverride: ""
+  initPolicy: "Create"  # VerticaDB initialization policy: "Create" or "Revive"
+
+# MinIO Configuration
+minio:
+  enabled: true
+  auth:
+    rootUser: "admin"
+    rootPassword: "nasa-data-hub-2024"
+  persistence:
+    enabled: true
+    size: 100Gi
+    storageClass: "local-storage"
+  service:
+    type: ClusterIP
+  ingress:
+    enabled: false
+  resources:
+    limits:
+      memory: 2Gi
+      cpu: 1000m
+    requests:
+      memory: 1Gi
+      cpu: 500m
+  defaultBuckets: "nasa-data-hub-vertica"
+
+# Vertica Operator Configuration
+verticadb-operator:
+  enabled: true
+  image:
+    repository: vertica/vertica-operator
+    tag: "25.3.0-0"
+    pullPolicy: IfNotPresent
+  resources:
+    limits:
+      memory: 512Mi
+      cpu: 500m
+    requests:
+      memory: 256Mi
+      cpu: 250m
+
+# Vertica Configuration
+verticadb:
+  enabled: true
+  replicaCount: 1
+  image:
+    repository: opentext/vertica-k8s
+    tag: "25.3.0-0"
+    pullPolicy: IfNotPresent
+  auth:
+    password: "vertica-password-2024"
+  persistence:
+    enabled: true
+    size: 50Gi
+    storageClass: "local-storage"
+  resources:
+    limits:
+      memory: 4Gi
+      cpu: 2000m
+    requests:
+      memory: 2Gi
+      cpu: 1000m
+  service:
+    type: ClusterIP
+    port: 5433
+  database:
+    name: "nasa_data"
+    user: "dbadmin"
+    password: "vertica-password-2024"
+
+# Metabase Configuration
+metabase:
+  enabled: true
+  image:
+    repository: metabase/metabase
+    tag: "v0.53.18"
+    pullPolicy: IfNotPresent
+  replicaCount: 1
+  resources:
+    limits:
+      memory: 2Gi
+      cpu: 1000m
+    requests:
+      memory: 1Gi
+      cpu: 500m
+  service:
+    type: ClusterIP
+    port: 3000
+  ingress:
+    enabled: false
+    className: ""
+    annotations: {}
+    hosts:
+      - host: metabase.local
+        paths:
+          - path: /
+            pathType: Prefix
+  config:
+    encryptionSecretKey: "nasa-data-hub-metabase-secret-key-2024"
+    databaseType: "h2"
+    databaseHost: ""
+    databasePort: ""
+    databaseName: ""
+    databaseUser: ""
+    databasePassword: ""
+
+# Ingress Configuration
+ingress:
+  enabled: false
+  className: ""
+  annotations: {}
+  hosts:
+    - host: nasa-data-hub.local
+      paths:
+        - path: /
+          pathType: Prefix
+  tls: []
+
+# Service Account
+serviceAccount:
+  create: true
+  annotations: {}
+  name: "nasa-data-hub"
+
+# Security Context
+securityContext:
+  runAsNonRoot: true
+  runAsUser: 1000
+  fsGroup: 1000
+
+# Pod Security Context
+podSecurityContext:
+  runAsNonRoot: true
+  runAsUser: 1000
+  fsGroup: 1000
