@@ -11,6 +11,15 @@ The system consists of four main components:
 3. **Vertica** - Analytical database (data warehouse) for processed data
 4. **Metabase** - Data visualization and dashboard creation tool
 
+## Features
+
+- **Fully Automated Deployment** - One-command deployment with `./deploy.sh`
+- **Automatic Setup** - Metabase automatically configured with admin user and Vertica database
+- **Smart Init Containers** - Proper dependency management between components
+- **Preinstall Jobs** - Infrastructure preparation (directories, permissions)
+- **JDBC Driver Management** - Automatic download of Vertica JDBC driver
+- **Cleanup Script** - Complete cleanup with `./cleanup.sh`
+
 ## Requirements
 
 - Kubernetes 1.19+
@@ -22,6 +31,13 @@ The system consists of four main components:
 
 ### 1. Install the chart
 
+**Option 1: Using deployment script (RECOMMENDED)**
+```bash
+# Use the deployment script to avoid Helm release secret size issues
+./deploy.sh
+```
+
+**Option 2: Direct Helm installation**
 ```bash
 # Basic installation
 helm install nasa-data-hub . --namespace nasa-data-hub --create-namespace
@@ -29,6 +45,8 @@ helm install nasa-data-hub . --namespace nasa-data-hub --create-namespace
 # With custom values
 helm install nasa-data-hub . -f values-prod.yaml --namespace nasa-data-hub --create-namespace
 ```
+
+**Note:** If you encounter "data: Too long" error with Helm, use the deployment script instead.
 
 ### 2. Check installation status
 
@@ -66,10 +84,10 @@ vertica:
 ### MinIO Console
 
 ```bash
-kubectl port-forward svc/nasa-data-hub-minio 9001:9001 -n nasa-data-hub
+kubectl port-forward svc/nasa-data-hub-minio-console 9090:9090 -n nasa-data-hub
 ```
 
-Open http://localhost:9001 in your browser
+Open http://localhost:9090 in your browser
 - Username: `admin`
 - Password: `nasa-data-hub-2024`
 
@@ -81,6 +99,12 @@ kubectl port-forward svc/nasa-data-hub-metabase 3000:3000 -n nasa-data-hub
 
 Open http://localhost:3000 in your browser
 
+**Login Credentials:**
+- Email: `admin@nasa-data-hub.local`
+- Password: `nasa-data-hub-2024`
+
+**Note:** Metabase is automatically configured during deployment with Vertica database connection. No manual setup required.
+
 ### Vertica Database
 
 ```bash
@@ -91,10 +115,11 @@ kubectl port-forward svc/nasa-data-hub-vertica 5433:5433 -n nasa-data-hub
 
 The components are deployed in the following order with dependency management:
 
-1. **MinIO** - Object storage
-2. **Vertica Operator** - Database management
-3. **Vertica** - Database (waits for MinIO via init containers)
-4. **Metabase** - Visualization (waits for Vertica via init containers)
+1. **Preinstall Job** - Creates directories and sets permissions
+2. **MinIO** - Object storage (waits for preinstall job via init container)
+3. **Vertica Operator** - Database management
+4. **Vertica** - Database instance
+5. **Metabase** - BI tool (waits for Vertica via init container, auto-configured with database connection)
 
 ## Monitoring and Logs
 
@@ -139,6 +164,17 @@ kubectl logs -l app.kubernetes.io/component=visualization -n nasa-data-hub
 
 ## Troubleshooting
 
+### Helm Release Secret Size Issues
+
+If you encounter "data: Too long" error when using `helm install`:
+
+```bash
+# Use the deployment script instead
+./deploy.sh
+```
+
+This script uses `kubectl apply` with Helm templates to avoid the secret size limitation.
+
 ### Persistent Volume Issues
 
 If PVCs remain in Pending state:
@@ -157,13 +193,12 @@ kubectl get verticadb -n nasa-data-hub
 kubectl describe verticadb nasa-data-hub-vertica -n nasa-data-hub
 ```
 
-### Init Container Issues
+### Setup Job Issues
 
-Check init container logs:
+Check setup job logs (includes Metabase setup and Vertica database addition):
 
 ```bash
-kubectl logs <pod-name> -c wait-for-minio -n nasa-data-hub
-kubectl logs <pod-name> -c wait-for-vertica -n nasa-data-hub
+kubectl logs job/nasa-data-hub-metabase-setup-database -n nasa-data-hub
 ```
 
 ## Updating
@@ -174,6 +209,12 @@ helm upgrade nasa-data-hub . -n nasa-data-hub
 
 ## Uninstalling
 
+**Option 1: Using cleanup script (RECOMMENDED)**
+```bash
+./cleanup.sh
+```
+
+**Option 2: Manual cleanup**
 ```bash
 helm uninstall nasa-data-hub -n nasa-data-hub
 kubectl delete namespace nasa-data-hub

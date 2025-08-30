@@ -27,6 +27,13 @@ persistentVolumes:
     size: "50Gi"
     basePath: "/tmp/nasa-data-hub-vertica"
     baseName: "nasa-data-hub-vertica-pv"
+    
+  # Metabase Data PersistentVolume
+  metabaseData:
+    enabled: true
+    name: "nasa-data-hub-metabase-data-pv"
+    size: "1Gi"
+    path: "/tmp/nasa-data-hub-metabase-data"
 
 # Directory Creation
 directories:
@@ -38,4 +45,4 @@ directories:
 minio:
   auth:
     rootUser: "admin"
-    rootPassword: "nasa-data-hub-2024"
+    rootPassword: "nasa-data-hub-2025"

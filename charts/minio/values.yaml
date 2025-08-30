@@ -444,7 +444,26 @@ extraVolumeMounts: []
 ##       - name: portname
 ##         containerPort: 1234
 ##
-initContainers: []
+initContainers:
+  # Wait for preinstall job to complete
+  - name: wait-for-preinstall
+    image: busybox:1.35
+    imagePullPolicy: IfNotPresent
+    command:
+      - /bin/sh
+      - -c
+      - |
+        echo "Waiting for preinstall job to complete..."
+        echo "Sleeping for 30 seconds to allow preinstall job to finish..."
+        sleep 30
+        echo "Preinstall job should be completed by now!"
+    resources:
+      limits:
+        memory: 64Mi
+        cpu: 100m
+      requests:
+        memory: 32Mi
+        cpu: 50m
 ## @param sidecars Add additional sidecar containers to the MinIO&reg; pods
 ## e.g:
 ## sidecars:

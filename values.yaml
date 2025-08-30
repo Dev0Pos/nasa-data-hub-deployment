@@ -12,7 +12,7 @@ minio:
   enabled: true
   auth:
     rootUser: "admin"
-    rootPassword: "nasa-data-hub-2024"
+    rootPassword: "nasa-data-hub-2025"
   persistence:
     enabled: true
     size: 100Gi
@@ -29,6 +29,10 @@ minio:
       memory: 1Gi
       cpu: 500m
   defaultBuckets: "nasa-data-hub-vertica"
+  # ServiceAccount configuration
+  serviceAccount:
+    create: true
+    automountServiceAccountToken: true
 
 # Vertica Operator Configuration
 verticadb-operator:
@@ -37,6 +41,8 @@ verticadb-operator:
     repository: vertica/vertica-operator
     tag: "25.3.0-0"
     pullPolicy: IfNotPresent
+  webhook:
+    enable: false
   resources:
     limits:
       memory: 512Mi
@@ -109,6 +115,21 @@ metabase:
     databaseName: ""
     databaseUser: ""
     databasePassword: ""
+    # Vertica connection configuration
+    verticaHost: "nasa-data-hub-vertica-nasa-data-hub-vertica"
+    verticaPort: "5433"
+    verticaDatabase: "nasa_data"
+    verticaUser: "dbadmin"
+    verticaPassword: "vertica-password-2024"
+  
+  # Vertica database configuration for Metabase
+  vertica:
+    host: "nasa-data-hub-vertica-nasa-data-hub-vertica"
+    port: 5433
+    database: "nasa_data"
+    username: "dbadmin"
+    password: "vertica-password-2024"
+  
 
 # Ingress Configuration
 ingress:
@@ -121,6 +142,32 @@ ingress:
         - path: /
           pathType: Prefix
   tls: []
+
+# Preinstall Configuration
+preinstall:
+  directories:
+    enabled: true
+    basePath: "/tmp"
+    permissions: "777"
+  persistentVolumes:
+    enabled: true
+    minio:
+      enabled: true
+      name: "nasa-data-hub-minio-pv"
+      size: "100Gi"
+      path: "/tmp/nasa-data-hub-minio"
+    vertica:
+      enabled: true
+      count: 1
+      size: "50Gi"
+      basePath: "/tmp/nasa-data-hub-vertica"
+      baseName: "nasa-data-hub-vertica-pv"
+  storageClass:
+    enabled: true
+    name: "local-storage"
+    isDefault: true
+    provisioner: "kubernetes.io/no-provisioner"
+    volumeBindingMode: "WaitForFirstConsumer"
 
 # Service Account
 serviceAccount:
