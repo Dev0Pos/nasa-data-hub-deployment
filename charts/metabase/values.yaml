@@ -1,0 +1,166 @@
+# Default values for metabase.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+# -------------------------------------------------------------------------------
+# NOTE: Whenever changing default values in here, be sure to update the
+# README.md in this directory.  That file lists out the helm chart parameters
+# with the default values.
+# -------------------------------------------------------------------------------
+
+# To control the name of all of the objects created in the helm chart.
+# nameOverride: metabase
+
+# To control the full name of all of the objects created in the helm chart.
+# fullnameOverride: metabase
+
+image:
+  repository: metabase/metabase
+  tag: "v0.53.18"
+  pullPolicy: IfNotPresent
+
+imagePullSecrets: []
+
+# Override the name of the service account
+serviceAccountNameOverride: ""
+
+# Annotations to add to the service account
+serviceAccountAnnotations: {}
+
+# Automatically create a service account
+serviceAccount:
+  create: true
+
+# Pod annotations
+podAnnotations: {}
+
+# Pod security context
+podSecurityContext: {}
+
+# Container security context
+containerSecurityContext: {}
+
+# Service configuration
+service:
+  type: ClusterIP
+  port: 3000
+  annotations: {}
+
+# Ingress configuration
+ingress:
+  enabled: false
+  className: ""
+  annotations: {}
+  hosts:
+    - host: metabase.local
+      paths:
+        - path: /
+          pathType: Prefix
+  tls: []
+
+# Resource limits and requests
+resources:
+  limits:
+    cpu: 1000m
+    memory: 2Gi
+  requests:
+    cpu: 500m
+    memory: 1Gi
+
+# Node selector
+nodeSelector: {}
+
+# Tolerations
+tolerations: []
+
+# Affinity
+affinity: {}
+
+# Metabase configuration
+config:
+  # Encryption secret key for Metabase
+  encryptionSecretKey: "nasa-data-hub-metabase-secret-key-2024"
+  
+  # Application database configuration (H2 for internal Metabase data)
+  databaseType: "h2"
+  databaseHost: ""
+  databasePort: ""
+  databaseName: ""
+  databaseUser: ""
+  databasePassword: ""
+  
+  # Vertica connection configuration for external data source
+  verticaHost: "nasa-data-hub-vertica-nasa-data-hub-vertica"
+  verticaPort: "5433"
+  verticaDatabase: "nasa_data"
+  verticaUser: "dbadmin"
+  verticaPassword: "vertica-password-2024"
+
+# JDBC driver configuration
+jdbc:
+  # Automatically download Vertica JDBC driver
+  autoDownload: true
+  # URL to download Vertica JDBC driver from
+  downloadUrl: "https://www.vertica.com/client_drivers/24.2.x/24.2.0-1/vertica-jdbc-24.2.0-1.jar"
+
+
+
+# Liveness probe configuration
+livenessProbe:
+  enabled: true
+  initialDelaySeconds: 60
+  periodSeconds: 30
+  timeoutSeconds: 10
+  failureThreshold: 3
+  successThreshold: 1
+
+# Readiness probe configuration
+readinessProbe:
+  enabled: true
+  initialDelaySeconds: 30
+  periodSeconds: 10
+  timeoutSeconds: 5
+  failureThreshold: 3
+  successThreshold: 1
+
+# Environment variables
+env: []
+# - name: MB_DB_SSL_MODE
+#   value: "disable"
+
+# Volume mounts
+volumeMounts: []
+# - name: custom-config
+#   mountPath: /custom-config
+
+# Volumes
+volumes: []
+# - name: custom-config
+#   configMap:
+#     name: metabase-custom-config
+
+# Automatic database setup
+setup:
+  # Automatically add Vertica as a data source
+  autoAddDatabase: false
+  # Wait for Metabase to be ready before adding database
+  waitForMetabase: true
+  # Admin user configuration
+  admin:
+    email: "admin@nasa-data-hub.local"
+    password: "nasa-data-hub-2024"
+    firstName: "Admin"
+    lastName: "User"
+  # Site configuration
+  site:
+    name: "NASA Data Hub"
+    locale: "en"
+    allowTracking: false
+
+# Vertica database configuration
+vertica:
+  host: "nasa-data-hub-vertica-nasa-data-hub-vertica"
+  port: 5433
+  database: "nasa_data"
+  username: "dbadmin"
+  password: "vertica-password-2024"

@@ -1,14 +1,13 @@
-{{- if .Values.enabled }}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ include "metabase.fullname" . }}
+  name: {{ include "metabase.deploymentName" . }}
   namespace: {{ .Release.Namespace }}
   labels:
     {{- include "metabase.labels" . | nindent 4 }}
     app.kubernetes.io/component: visualization
 spec:
-  replicas: {{ .Values.replicaCount }}
+  replicas: 1
   selector:
     matchLabels:
       {{- include "metabase.selectorLabels" . | nindent 6 }}
@@ -18,15 +17,37 @@ spec:
       labels:
         {{- include "metabase.selectorLabels" . | nindent 8 }}
         app.kubernetes.io/component: visualization
+      {{- with .Values.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
     spec:
+      serviceAccountName: {{ include "metabase.serviceAccountName" . }}
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
       {{- with .Values.podSecurityContext }}
       securityContext:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
         {{- toYaml . | nindent 8 }}
       {{- end }}
       initContainers:
       - name: wait-for-vertica
         image: busybox:1.35
-        command: ['sh', '-c', 'until nc -z nasa-data-hub-vertica-nasa-data-hub-vertica 5433; do echo waiting for vertica; sleep 2; done;']
+        imagePullPolicy: IfNotPresent
+        command: ['sh', '-c', 'until wget -q --spider {{ .Values.config.verticaHost }}:{{ .Values.config.verticaPort }} 2>/dev/null || nc -z {{ .Values.config.verticaHost }} {{ .Values.config.verticaPort }} 2>/dev/null; do echo waiting for vertica; sleep 2; done;']
         resources:
           limits:
             memory: 64Mi
@@ -34,6 +55,21 @@ spec:
           requests:
             memory: 32Mi
             cpu: 50m
+      - name: download-jdbc-driver
+        image: curlimages/curl:latest
+        imagePullPolicy: IfNotPresent
+        command: ['sh', '-c', 'curl -L -o /plugins/vertica-jdbc-24.2.0-1.jar https://www.vertica.com/client_drivers/24.2.x/24.2.0-1/vertica-jdbc-24.2.0-1.jar']
+        volumeMounts:
+        - name: jdbc-drivers
+          mountPath: /plugins
+        resources:
+          limits:
+            memory: 128Mi
+            cpu: 200m
+          requests:
+            memory: 64Mi
+            cpu: 100m
+
       containers:
       - name: metabase
         image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
@@ -44,95 +80,83 @@ spec:
           protocol: TCP
         env:
         - name: MB_ENCRYPTION_SECRET_KEY
-          value: {{ .Values.config.encryptionSecretKey | quote }}
+          valueFrom:
+            secretKeyRef:
+              name: {{ include "metabase.secretName" . }}
+              key: encryption-secret-key
         - name: MB_DB_TYPE
           value: {{ .Values.config.databaseType | quote }}
+        - name: MB_PLUGINS_DIR
+          value: "/plugins"
+        {{- if .Values.config.databaseHost }}
         - name: MB_DB_HOST
           value: {{ .Values.config.databaseHost | quote }}
+        {{- end }}
+        {{- if .Values.config.databasePort }}
         - name: MB_DB_PORT
           value: {{ .Values.config.databasePort | quote }}
+        {{- end }}
+        {{- if .Values.config.databaseName }}
         - name: MB_DB_DBNAME
           value: {{ .Values.config.databaseName | quote }}
+        {{- end }}
+        {{- if .Values.config.databaseUser }}
         - name: MB_DB_USER
           value: {{ .Values.config.databaseUser | quote }}
+        {{- end }}
+        {{- if .Values.config.databasePassword }}
         - name: MB_DB_PASS
-          value: {{ .Values.config.databasePassword | quote }}
-        - name: JAVA_OPTS
-          value: "-Xmx1536m -Xms512m"
-        resources:
-          {{- toYaml .Values.resources | nindent 10 }}
+          valueFrom:
+            secretKeyRef:
+              name: {{ include "metabase.secretName" . }}
+              key: database-password
+        {{- end }}
+
+        {{- with .Values.env }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+        {{- if .Values.livenessProbe.enabled }}
         livenessProbe:
           httpGet:
             path: /api/health
             port: http
-          initialDelaySeconds: 60
-          periodSeconds: 30
+          initialDelaySeconds: {{ .Values.livenessProbe.initialDelaySeconds }}
+          periodSeconds: {{ .Values.livenessProbe.periodSeconds }}
+          timeoutSeconds: {{ .Values.livenessProbe.timeoutSeconds }}
+          failureThreshold: {{ .Values.livenessProbe.failureThreshold }}
+          successThreshold: {{ .Values.livenessProbe.successThreshold }}
+        {{- end }}
+        {{- if .Values.readinessProbe.enabled }}
         readinessProbe:
           httpGet:
             path: /api/health
             port: http
-          initialDelaySeconds: 30
-          periodSeconds: 10
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: {{ include "metabase.fullname" . }}
-  namespace: {{ .Release.Namespace }}
-  labels:
-    {{- include "metabase.labels" . | nindent 4 }}
-    app.kubernetes.io/component: visualization
-spec:
-  type: {{ .Values.service.type }}
-  ports:
-    - port: {{ .Values.service.port }}
-      targetPort: http
-      protocol: TCP
-      name: http
-  selector:
-    {{- include "metabase.selectorLabels" . | nindent 4 }}
-    app.kubernetes.io/component: visualization
-{{- if .Values.ingress.enabled }}
----
-apiVersion: networking.k8s.io/v1
-kind: Ingress
-metadata:
-  name: {{ include "metabase.fullname" . }}
-  labels:
-    {{- include "metabase.labels" . | nindent 4 }}
-    app.kubernetes.io/component: visualization
-  {{- with .Values.ingress.annotations }}
-  annotations:
-    {{- toYaml . | nindent 4 }}
-  {{- end }}
-spec:
-  {{- if .Values.ingress.className }}
-  ingressClassName: {{ .Values.ingress.className }}
-  {{- end }}
-  {{- if .Values.ingress.tls }}
-  tls:
-    {{- range .Values.ingress.tls }}
-    - hosts:
-        {{- range .hosts }}
-        - {{ . | quote }}
+          initialDelaySeconds: {{ .Values.readinessProbe.initialDelaySeconds }}
+          periodSeconds: {{ .Values.readinessProbe.periodSeconds }}
+          timeoutSeconds: {{ .Values.readinessProbe.timeoutSeconds }}
+          failureThreshold: {{ .Values.readinessProbe.failureThreshold }}
+          successThreshold: {{ .Values.readinessProbe.successThreshold }}
         {{- end }}
-      secretName: {{ .secretName }}
-    {{- end }}
-  {{- end }}
-  rules:
-    {{- range .Values.ingress.hosts }}
-    - host: {{ .host | quote }}
-      http:
-        paths:
-          {{- range .paths }}
-          - path: {{ .path }}
-            pathType: {{ .pathType }}
-            backend:
-              service:
-                name: {{ include "metabase.fullname" $ }}
-                port:
-                  number: {{ $.Values.service.port }}
-          {{- end }}
-    {{- end }}
-{{- end }}
-{{- end }}
+        resources:
+          {{- toYaml .Values.resources | nindent 10 }}
+        {{- with .Values.containerSecurityContext }}
+        securityContext:
+          {{- toYaml . | nindent 10 }}
+        {{- end }}
+        volumeMounts:
+        - name: jdbc-drivers
+          mountPath: /plugins
+        - name: metabase-data
+          mountPath: /metabase.db
+        {{- with .Values.volumeMounts }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+      volumes:
+      - name: jdbc-drivers
+        emptyDir: {}
+      - name: metabase-data
+        persistentVolumeClaim:
+          claimName: {{ include "metabase.fullname" . }}-data
+      {{- with .Values.volumes }}
+      {{- toYaml . | nindent 6 }}
+      {{- end }}

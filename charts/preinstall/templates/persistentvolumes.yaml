@@ -38,4 +38,24 @@ spec:
 {{- end }}
 {{- end }}
 
+{{- if .Values.persistentVolumes.metabaseData.enabled }}
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: nasa-data-hub-metabase-data-pv
+  labels:
+    type: local-storage
+spec:
+  storageClassName: local-storage
+  capacity:
+    storage: 1Gi
+  accessModes:
+    - ReadWriteOnce
+  hostPath:
+    path: /tmp/nasa-data-hub-metabase-data
+  persistentVolumeReclaimPolicy: Delete
+  volumeMode: Filesystem
+{{- end }}
+
 {{- end }}

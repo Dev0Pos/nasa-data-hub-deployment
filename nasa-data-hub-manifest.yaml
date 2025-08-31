@@ -1,0 +1,1686 @@
+---
+# Source: nasa-data-hub/charts/minio/templates/console/networkpolicy.yaml
+kind: NetworkPolicy
+apiVersion: networking.k8s.io/v1
+metadata:
+  name: nasa-data-hub-minio-console
+  namespace: "nasa-data-hub"
+  labels:
+    app.kubernetes.io/instance: nasa-data-hub
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/name: minio
+    app.kubernetes.io/version: 2.0.2
+    helm.sh/chart: minio-17.0.21
+    app.kubernetes.io/component: console
+    app.kubernetes.io/part-of: minio
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/instance: nasa-data-hub
+      app.kubernetes.io/name: minio
+      app.kubernetes.io/component: console
+      app.kubernetes.io/part-of: minio
+  policyTypes:
+    - Ingress
+    - Egress
+  egress:
+    - {}
+  ingress:
+    # Allow inbound connections
+    - ports:
+        - port: 9090
+---
+# Source: nasa-data-hub/charts/minio/templates/networkpolicy.yaml
+kind: NetworkPolicy
+apiVersion: networking.k8s.io/v1
+metadata:
+  name: nasa-data-hub-minio
+  namespace: "nasa-data-hub"
+  labels:
+    app.kubernetes.io/instance: nasa-data-hub
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/name: minio
+    app.kubernetes.io/version: 2025.7.23
+    helm.sh/chart: minio-17.0.21
+    app.kubernetes.io/component: minio
+    app.kubernetes.io/part-of: minio
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/instance: nasa-data-hub
+      app.kubernetes.io/name: minio
+      app.kubernetes.io/component: minio
+      app.kubernetes.io/part-of: minio
+  policyTypes:
+    - Ingress
+    - Egress
+  egress:
+    - {}
+  ingress:
+    # Allow inbound connections
+    - ports:
+        - port: 9000
+---
+# Source: nasa-data-hub/charts/minio/templates/console/pdb.yaml
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: nasa-data-hub-minio-console
+  namespace: "nasa-data-hub"
+  labels:
+    app.kubernetes.io/instance: nasa-data-hub
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/name: minio
+    app.kubernetes.io/version: 2.0.2
+    helm.sh/chart: minio-17.0.21
+    app.kubernetes.io/component: console
+    app.kubernetes.io/part-of: minio
+spec:
+  maxUnavailable: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/instance: nasa-data-hub
+      app.kubernetes.io/name: minio
+      app.kubernetes.io/component: console
+      app.kubernetes.io/part-of: minio
+---
+# Source: nasa-data-hub/charts/minio/templates/pdb.yaml
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: nasa-data-hub-minio
+  namespace: "nasa-data-hub"
+  labels:
+    app.kubernetes.io/instance: nasa-data-hub
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/name: minio
+    app.kubernetes.io/version: 2025.7.23
+    helm.sh/chart: minio-17.0.21
+    app.kubernetes.io/component: minio
+    app.kubernetes.io/part-of: minio
+spec:
+  maxUnavailable: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/instance: nasa-data-hub
+      app.kubernetes.io/name: minio
+      app.kubernetes.io/component: minio
+      app.kubernetes.io/part-of: minio
+---
+# Source: nasa-data-hub/charts/metabase/templates/serviceaccount.yaml
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: nasa-data-hub-metabase
+  namespace: nasa-data-hub
+  labels:
+    helm.sh/chart: metabase-0.1.0
+    app.kubernetes.io/name: metabase
+    app.kubernetes.io/instance: nasa-data-hub
+    app.kubernetes.io/version: "1.0.0"
+    app.kubernetes.io/managed-by: Helm
+---
+# Source: nasa-data-hub/charts/minio/templates/serviceaccount.yaml
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: nasa-data-hub-minio
+  namespace: "nasa-data-hub"
+  labels:
+    app.kubernetes.io/instance: nasa-data-hub
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/name: minio
+    app.kubernetes.io/version: 2025.7.23
+    helm.sh/chart: minio-17.0.21
+    app.kubernetes.io/part-of: minio
+automountServiceAccountToken: true
+secrets:
+  - name: nasa-data-hub-minio
+---
+# Source: nasa-data-hub/charts/preinstall/templates/serviceaccount.yaml
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: nasa-data-hub-preinstall-sa
+  namespace: nasa-data-hub
+  labels:
+    helm.sh/chart: preinstall-0.1.0
+    app.kubernetes.io/name: preinstall
+    app.kubernetes.io/instance: nasa-data-hub
+    app.kubernetes.io/version: "1.0.0"
+    app.kubernetes.io/managed-by: Helm
+---
+# Source: nasa-data-hub/charts/verticadb-operator/templates/verticadb-operator-manager-sa.yaml
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: verticadb-operator-manager
+  namespace: nasa-data-hub
+---
+# Source: nasa-data-hub/charts/metabase/templates/secret.yaml
+apiVersion: v1
+kind: Secret
+metadata:
+  name: nasa-data-hub-metabase-secret
+  namespace: nasa-data-hub
+  labels:
+    helm.sh/chart: metabase-0.1.0
+    app.kubernetes.io/name: metabase
+    app.kubernetes.io/instance: nasa-data-hub
+    app.kubernetes.io/version: "1.0.0"
+    app.kubernetes.io/managed-by: Helm
+type: Opaque
+data:
+  encryption-secret-key: bmFzYS1kYXRhLWh1Yi1tZXRhYmFzZS1zZWNyZXQta2V5LTIwMjQ=
+  vertica-password: dmVydGljYS1wYXNzd29yZC0yMDI0
+---
+# Source: nasa-data-hub/charts/minio/templates/secrets.yaml
+apiVersion: v1
+kind: Secret
+metadata:
+  name: nasa-data-hub-minio
+  namespace: "nasa-data-hub"
+  labels:
+    app.kubernetes.io/instance: nasa-data-hub
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/name: minio
+    app.kubernetes.io/version: 2025.7.23
+    helm.sh/chart: minio-17.0.21
+    app.kubernetes.io/component: minio
+    app.kubernetes.io/part-of: minio
+type: Opaque
+data:
+  root-user: "YWRtaW4="
+  root-password: "bmFzYS1kYXRhLWh1Yi0yMDI1"
+---
+# Source: nasa-data-hub/charts/preinstall/templates/verticadb-secret.yaml
+apiVersion: v1
+kind: Secret
+metadata:
+  name: nasa-data-hub-vertica-creds
+  namespace: nasa-data-hub
+  labels:
+    helm.sh/chart: preinstall-0.1.0
+    app.kubernetes.io/name: preinstall
+    app.kubernetes.io/instance: nasa-data-hub
+    app.kubernetes.io/version: "1.0.0"
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/component: database
+type: Opaque
+data:
+  accesskey: YWRtaW4=
+  secretkey: bmFzYS1kYXRhLWh1Yi0yMDI1
+---
+# Source: nasa-data-hub/charts/verticadb-operator/templates/verticadb-operator-manager-config-cm.yaml
+apiVersion: v1
+data:
+  WEBHOOK_CERT_SOURCE: internal
+  BROADCASTER_BURST_SIZE: "100"
+  CONCURRENCY_EVENTTRIGGER: "1"
+  CONCURRENCY_SANDBOXCONFIGMAP: "1"
+  CONCURRENCY_VERTICAAUTOSCALER: "1"
+  CONCURRENCY_VERTICADB: "5"
+  CONCURRENCY_VERTICAREPLICATOR: "3"
+  CONCURRENCY_VERTICARESTOREPOINTSQUERY: "1"
+  CONCURRENCY_VERTICASCRUTINIZE: "1"
+  CONTROLLERS_ENABLED: "true"
+  CONTROLLERS_SCOPE: "cluster"
+  DEPLOY_WITH: helm
+  LOG_LEVEL: "info"
+  LOG_FILE_PATH: ""
+  LOG_MAX_FILE_SIZE: ""
+  LOG_MAX_FILE_AGE: ""
+  LOG_MAX_FILE_ROTATION: ""
+  DEV_MODE: ""
+  METRICS_ADDR: "0"
+  METRICS_EXPOSE_MODE:  "Disable"
+  METRICS_TLS_SECRET:  ""
+  PREFIX_NAME: verticadb-operator
+  SANDBOX_MAX_BACKOFF_DURATION: "1000"
+  VDB_MAX_BACKOFF_DURATION: "1000"
+  VERSION: 25.3.0-0
+  WEBHOOK_CERT_SECRET: ""
+  WEBHOOKS_ENABLED: "false"
+kind: ConfigMap
+metadata:
+  labels:
+    control-plane: verticadb-operator
+  name: verticadb-operator-manager-config
+  namespace: nasa-data-hub
+---
+# Source: nasa-data-hub/charts/preinstall/templates/storageclass.yaml
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: local-storage
+  annotations:
+    storageclass.kubernetes.io/is-default-class: "true"
+provisioner: kubernetes.io/no-provisioner
+volumeBindingMode: WaitForFirstConsumer
+---
+# Source: nasa-data-hub/charts/preinstall/templates/persistentvolumes.yaml
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: nasa-data-hub-minio-pv
+spec:
+  capacity:
+    storage: 100Gi
+  accessModes:
+    - ReadWriteOnce
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: local-storage
+  hostPath:
+    path: /tmp/nasa-data-hub-minio
+    type: DirectoryOrCreate
+---
+# Source: nasa-data-hub/charts/preinstall/templates/persistentvolumes.yaml
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: nasa-data-hub-vertica-pv-0
+spec:
+  capacity:
+    storage: 50Gi
+  accessModes:
+    - ReadWriteOnce
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: local-storage
+  hostPath:
+    path: /tmp/nasa-data-hub-vertica-0
+    type: DirectoryOrCreate
+---
+# Source: nasa-data-hub/charts/minio/templates/pvc.yaml
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: nasa-data-hub-minio
+  namespace: "nasa-data-hub"
+  labels:
+    app.kubernetes.io/instance: nasa-data-hub
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/name: minio
+    app.kubernetes.io/version: 2025.7.23
+    helm.sh/chart: minio-17.0.21
+    app.kubernetes.io/component: minio
+    app.kubernetes.io/part-of: minio
+spec:
+  accessModes:
+    - "ReadWriteOnce"
+  resources:
+    requests:
+      storage: "100Gi"
+  storageClassName: local-storage
+---
+# Source: nasa-data-hub/charts/preinstall/templates/serviceaccount.yaml
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: nasa-data-hub-preinstall-init-role
+rules:
+- apiGroups: [""]
+  resources: ["nodes"]
+  verbs: ["get", "list"]
+---
+# Source: nasa-data-hub/charts/verticadb-operator/templates/verticadb-operator-manager-role-cr.yaml
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: verticadb-operator-manager-role
+rules:
+- apiGroups:
+  - ""
+  resources:
+  - configmaps
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - update
+  - watch
+- apiGroups:
+  - ""
+  resources:
+  - events
+  verbs:
+  - create
+  - patch
+- apiGroups:
+  - ""
+  resources:
+  - persistentvolumeclaims
+  verbs:
+  - get
+  - list
+  - update
+  - watch
+- apiGroups:
+  - ""
+  resources:
+  - pods
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - ""
+  resources:
+  - pods/exec
+  verbs:
+  - create
+- apiGroups:
+  - ""
+  resources:
+  - pods/status
+  verbs:
+  - update
+- apiGroups:
+  - ""
+  resources:
+  - secrets
+  verbs:
+  - create
+  - get
+  - list
+  - update
+  - watch
+- apiGroups:
+  - apps
+  resources:
+  - deployments
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - apps
+  resources:
+  - statefulsets
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - autoscaling
+  resources:
+  - horizontalpodautoscalers
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - batch
+  resources:
+  - jobs
+  verbs:
+  - create
+  - get
+  - list
+  - watch
+- apiGroups:
+  - ""
+  resources:
+  - namespaces
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - ""
+  resources:
+  - serviceaccounts
+  verbs:
+  - create
+  - get
+  - list
+  - watch
+- apiGroups:
+  - ""
+  resources:
+  - services
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - keda.sh
+  resources:
+  - scaledobjects
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - keda.sh
+  resources:
+  - triggerauthentications
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - rbac.authorization.k8s.io
+  resources:
+  - rolebindings
+  verbs:
+  - create
+  - get
+  - list
+  - watch
+- apiGroups:
+  - rbac.authorization.k8s.io
+  resources:
+  - roles
+  verbs:
+  - create
+  - get
+  - list
+  - watch
+- apiGroups:
+  - vertica.com
+  resources:
+  - eventtriggers
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - vertica.com
+  resources:
+  - eventtriggers/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - vertica.com
+  resources:
+  - eventtriggers/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
+  - vertica.com
+  resources:
+  - verticaautoscalers
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - vertica.com
+  resources:
+  - verticaautoscalers/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - vertica.com
+  resources:
+  - verticaautoscalers/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
+  - vertica.com
+  resources:
+  - verticadbs
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - vertica.com
+  resources:
+  - verticadbs/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - vertica.com
+  resources:
+  - verticadbs/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
+  - vertica.com
+  resources:
+  - verticareplicators
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - vertica.com
+  resources:
+  - verticareplicators/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - vertica.com
+  resources:
+  - verticareplicators/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
+  - vertica.com
+  resources:
+  - verticarestorepointsqueries
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - vertica.com
+  resources:
+  - verticarestorepointsqueries/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - vertica.com
+  resources:
+  - verticarestorepointsqueries/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
+  - vertica.com
+  resources:
+  - verticascrutinizers
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - vertica.com
+  resources:
+  - verticascrutinizers/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - vertica.com
+  resources:
+  - verticascrutinizers/status
+  verbs:
+  - get
+  - patch
+  - update
+---
+# Source: nasa-data-hub/charts/preinstall/templates/serviceaccount.yaml
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: nasa-data-hub-preinstall-init-rolebinding
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: nasa-data-hub-preinstall-init-role
+subjects:
+- kind: ServiceAccount
+  name: nasa-data-hub-preinstall-sa
+  namespace: nasa-data-hub
+---
+# Source: nasa-data-hub/charts/verticadb-operator/templates/verticadb-operator-manager-clusterrolebinding-crb.yaml
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: verticadb-operator-manager-clusterrolebinding
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: verticadb-operator-manager-role
+subjects:
+- kind: ServiceAccount
+  name: verticadb-operator-manager
+  namespace: nasa-data-hub
+---
+# Source: nasa-data-hub/charts/minio/templates/rbac.yaml
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: nasa-data-hub-minio-job-checker
+  namespace: "nasa-data-hub"
+  labels:
+    app.kubernetes.io/instance: nasa-data-hub
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/name: minio
+    app.kubernetes.io/version: 2025.7.23
+    helm.sh/chart: minio-17.0.21
+    app.kubernetes.io/part-of: minio
+rules:
+- apiGroups: ["batch"]
+  resources: ["jobs"]
+  verbs: ["get", "list", "watch"]
+---
+# Source: nasa-data-hub/charts/verticadb-operator/templates/verticadb-operator-leader-election-role-role.yaml
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: verticadb-operator-leader-election-role
+  namespace: nasa-data-hub
+rules:
+- apiGroups:
+  - ""
+  resources:
+  - configmaps
+  verbs:
+  - get
+  - list
+  - watch
+  - create
+  - update
+  - patch
+  - delete
+- apiGroups:
+  - coordination.k8s.io
+  resources:
+  - leases
+  verbs:
+  - get
+  - list
+  - watch
+  - create
+  - update
+  - patch
+  - delete
+- apiGroups:
+  - ""
+  resources:
+  - events
+  verbs:
+  - create
+  - patch
+---
+# Source: nasa-data-hub/charts/minio/templates/rbac.yaml
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: nasa-data-hub-minio-job-checker
+  namespace: "nasa-data-hub"
+  labels:
+    app.kubernetes.io/instance: nasa-data-hub
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/name: minio
+    app.kubernetes.io/version: 2025.7.23
+    helm.sh/chart: minio-17.0.21
+    app.kubernetes.io/part-of: minio
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: nasa-data-hub-minio-job-checker
+subjects:
+- kind: ServiceAccount
+  name: nasa-data-hub-minio
+  namespace: "nasa-data-hub"
+---
+# Source: nasa-data-hub/charts/verticadb-operator/templates/verticadb-operator-leader-election-rolebinding-rb.yaml
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: verticadb-operator-leader-election-rolebinding
+  namespace: nasa-data-hub
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: verticadb-operator-leader-election-role
+subjects:
+- kind: ServiceAccount
+  name: verticadb-operator-manager
+  namespace: nasa-data-hub
+---
+# Source: nasa-data-hub/charts/metabase/templates/service.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: nasa-data-hub-metabase
+  namespace: nasa-data-hub
+  labels:
+    helm.sh/chart: metabase-0.1.0
+    app.kubernetes.io/name: metabase
+    app.kubernetes.io/instance: nasa-data-hub
+    app.kubernetes.io/version: "1.0.0"
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/component: visualization
+spec:
+  type: ClusterIP
+  ports:
+    - port: 3000
+      targetPort: http
+      protocol: TCP
+      name: http
+  selector:
+    app.kubernetes.io/name: metabase
+    app.kubernetes.io/instance: nasa-data-hub
+    app.kubernetes.io/component: visualization
+---
+# Source: nasa-data-hub/charts/minio/templates/console/service.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: nasa-data-hub-minio-console
+  namespace: "nasa-data-hub"
+  labels:
+    app.kubernetes.io/instance: nasa-data-hub
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/name: minio
+    app.kubernetes.io/version: 2.0.2
+    helm.sh/chart: minio-17.0.21
+    app.kubernetes.io/component: console
+    app.kubernetes.io/part-of: minio
+spec:
+  type: ClusterIP
+  ports:
+    - name: http
+      port: 9090
+      targetPort: http
+      nodePort: null
+  selector:
+    app.kubernetes.io/instance: nasa-data-hub
+    app.kubernetes.io/name: minio
+    app.kubernetes.io/component: console
+    app.kubernetes.io/part-of: minio
+---
+# Source: nasa-data-hub/charts/minio/templates/service.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: nasa-data-hub-minio
+  namespace: "nasa-data-hub"
+  labels:
+    app.kubernetes.io/instance: nasa-data-hub
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/name: minio
+    app.kubernetes.io/version: 2025.7.23
+    helm.sh/chart: minio-17.0.21
+    app.kubernetes.io/component: minio
+    app.kubernetes.io/part-of: minio
+spec:
+  type: ClusterIP
+  ports:
+    - name: tcp-api
+      port: 9000
+      targetPort: api
+      nodePort: null
+  selector:
+    app.kubernetes.io/instance: nasa-data-hub
+    app.kubernetes.io/name: minio
+    app.kubernetes.io/component: minio
+    app.kubernetes.io/part-of: minio
+---
+# Source: nasa-data-hub/charts/verticadb-operator/templates/verticadb-operator-webhook-service-svc.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    control-plane: verticadb-operator
+    vertica.com/svc-type: webhook
+  name: verticadb-operator-webhook-service
+  namespace: nasa-data-hub
+spec:
+  ports:
+  - port: 443
+    protocol: TCP
+    targetPort: 9443
+  selector:
+    control-plane: verticadb-operator
+---
+# Source: nasa-data-hub/charts/metabase/templates/deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nasa-data-hub-metabase
+  namespace: nasa-data-hub
+  labels:
+    helm.sh/chart: metabase-0.1.0
+    app.kubernetes.io/name: metabase
+    app.kubernetes.io/instance: nasa-data-hub
+    app.kubernetes.io/version: "1.0.0"
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/component: visualization
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: metabase
+      app.kubernetes.io/instance: nasa-data-hub
+      app.kubernetes.io/component: visualization
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: metabase
+        app.kubernetes.io/instance: nasa-data-hub
+        app.kubernetes.io/component: visualization
+    spec:
+      serviceAccountName: nasa-data-hub-metabase
+      initContainers:
+      - name: wait-for-vertica
+        image: busybox:1.35
+        imagePullPolicy: IfNotPresent
+        command: ['sh', '-c', 'until wget -q --spider nasa-data-hub-vertica-nasa-data-hub-vertica:5433 2>/dev/null || nc -z nasa-data-hub-vertica-nasa-data-hub-vertica 5433 2>/dev/null; do echo waiting for vertica; sleep 2; done;']
+        resources:
+          limits:
+            memory: 64Mi
+            cpu: 100m
+          requests:
+            memory: 32Mi
+            cpu: 50m
+      - name: download-jdbc-driver
+        image: curlimages/curl:latest
+        imagePullPolicy: IfNotPresent
+        command: ['sh', '-c', 'curl -L -o /jdbc-drivers/vertica-jdbc-24.2.0-1.jar https://www.vertica.com/client_drivers/24.2.x/24.2.0-1/vertica-jdbc-24.2.0-1.jar']
+        volumeMounts:
+        - name: jdbc-drivers
+          mountPath: /jdbc-drivers
+        resources:
+          limits:
+            memory: 128Mi
+            cpu: 200m
+          requests:
+            memory: 64Mi
+            cpu: 100m
+
+      containers:
+      - name: metabase
+        image: "metabase/metabase:v0.53.18"
+        imagePullPolicy: IfNotPresent
+        ports:
+        - name: http
+          containerPort: 3000
+          protocol: TCP
+        env:
+        - name: MB_ENCRYPTION_SECRET_KEY
+          valueFrom:
+            secretKeyRef:
+              name: nasa-data-hub-metabase-secret
+              key: encryption-secret-key
+        - name: MB_DB_TYPE
+          value: "h2"
+        livenessProbe:
+          httpGet:
+            path: /api/health
+            port: http
+          initialDelaySeconds: 60
+          periodSeconds: 30
+          timeoutSeconds: 10
+          failureThreshold: 3
+          successThreshold: 1
+        readinessProbe:
+          httpGet:
+            path: /api/health
+            port: http
+          initialDelaySeconds: 30
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 3
+          successThreshold: 1
+        resources:
+          limits:
+            cpu: 1000m
+            memory: 2Gi
+          requests:
+            cpu: 500m
+            memory: 1Gi
+        volumeMounts:
+        - name: jdbc-drivers
+          mountPath: /plugins/vertica-jdbc-24.2.0-1.jar
+          subPath: vertica-jdbc-24.2.0-1.jar
+      volumes:
+      - name: jdbc-drivers
+        emptyDir: {}
+---
+# Source: nasa-data-hub/charts/minio/templates/application.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nasa-data-hub-minio
+  namespace: "nasa-data-hub"
+  labels:
+    app.kubernetes.io/instance: nasa-data-hub
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/name: minio
+    app.kubernetes.io/version: 2025.7.23
+    helm.sh/chart: minio-17.0.21
+    app.kubernetes.io/component: minio
+    app.kubernetes.io/part-of: minio
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/instance: nasa-data-hub
+      app.kubernetes.io/name: minio
+      app.kubernetes.io/component: minio
+      app.kubernetes.io/part-of: minio
+  strategy:
+    type: RollingUpdate
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/instance: nasa-data-hub
+        app.kubernetes.io/managed-by: Helm
+        app.kubernetes.io/name: minio
+        app.kubernetes.io/version: 2025.7.23
+        helm.sh/chart: minio-17.0.21
+        app.kubernetes.io/component: minio
+        app.kubernetes.io/part-of: minio
+      annotations:
+        checksum/credentials-secret: ae56793a20c8e2a2fc9007b9557a2d0feb343ab53e38e3556473a05eaf1d918b
+    spec:
+      
+      serviceAccountName: nasa-data-hub-minio
+      affinity:
+        podAffinity:
+          
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+            - podAffinityTerm:
+                labelSelector:
+                  matchLabels:
+                    app.kubernetes.io/instance: nasa-data-hub
+                    app.kubernetes.io/name: minio
+                    app.kubernetes.io/component: minio
+                topologyKey: kubernetes.io/hostname
+              weight: 1
+        nodeAffinity:
+          
+      automountServiceAccountToken: false
+      securityContext:
+        fsGroup: 1001
+        fsGroupChangePolicy: OnRootMismatch
+        supplementalGroups: []
+        sysctls: []
+      initContainers:
+        - command:
+          - /bin/sh
+          - -c
+          - |
+            echo "Waiting for preinstall job to complete..."
+            echo "Sleeping for 30 seconds to allow preinstall job to finish..."
+            sleep 30
+            echo "Preinstall job should be completed by now!"
+          image: busybox:1.35
+          imagePullPolicy: IfNotPresent
+          name: wait-for-preinstall
+          resources:
+            limits:
+              cpu: 100m
+              memory: 64Mi
+            requests:
+              cpu: 50m
+              memory: 32Mi
+      containers:
+        - name: minio
+          image: docker.io/bitnami/minio:2025.7.23-debian-12-r3
+          imagePullPolicy: "IfNotPresent"
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+              - ALL
+            privileged: false
+            readOnlyRootFilesystem: true
+            runAsGroup: 1001
+            runAsNonRoot: true
+            runAsUser: 1001
+            seLinuxOptions: {}
+            seccompProfile:
+              type: RuntimeDefault
+          env:
+            - name: BITNAMI_DEBUG
+              value: "false"
+            - name: MINIO_DISTRIBUTED_MODE_ENABLED
+              value: "no"
+            - name: MINIO_SCHEME
+              value: "http"
+            - name: MINIO_FORCE_NEW_KEYS
+              value: "no"
+            - name: MINIO_ROOT_USER_FILE
+              value: /opt/bitnami/minio/secrets/root-user
+            - name: MINIO_ROOT_PASSWORD_FILE
+              value: /opt/bitnami/minio/secrets/root-password
+            - name: MINIO_SKIP_CLIENT
+              value: "no"
+            - name: MINIO_DEFAULT_BUCKETS
+              value: nasa-data-hub-vertica
+            - name: MINIO_API_PORT_NUMBER
+              value: "9000"
+            - name: MINIO_BROWSER
+              value: "off"
+            - name: MINIO_PROMETHEUS_AUTH_TYPE
+              value: "public"
+            - name: MINIO_DATA_DIR
+              value: "/bitnami/minio/data"
+          ports:
+            - name: api
+              containerPort: 9000
+          livenessProbe:
+            httpGet:
+              path: /minio/health/live
+              port: api
+              scheme: "HTTP"
+            initialDelaySeconds: 5
+            periodSeconds: 5
+            timeoutSeconds: 5
+            successThreshold: 1
+            failureThreshold: 5
+          readinessProbe:
+            tcpSocket:
+              port: api
+            initialDelaySeconds: 5
+            periodSeconds: 5
+            timeoutSeconds: 1
+            successThreshold: 1
+            failureThreshold: 5
+          resources:
+            limits:
+              cpu: 1000m
+              memory: 2Gi
+            requests:
+              cpu: 500m
+              memory: 1Gi
+          volumeMounts:
+            - name: empty-dir
+              mountPath: /tmp
+              subPath: tmp-dir
+            - name: empty-dir
+              mountPath: /opt/bitnami/minio/tmp
+              subPath: app-tmp-dir
+            - name: empty-dir
+              mountPath: /.mc
+              subPath: app-mc-dir
+            - name: minio-credentials
+              mountPath: /opt/bitnami/minio/secrets/
+            - name: data
+              mountPath: /bitnami/minio/data
+      volumes:
+        - name: empty-dir
+          emptyDir: {}
+        - name: minio-credentials
+          secret:
+            secretName: nasa-data-hub-minio
+        - name: data
+          persistentVolumeClaim:
+            claimName: nasa-data-hub-minio
+---
+# Source: nasa-data-hub/charts/minio/templates/console/deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nasa-data-hub-minio-console
+  namespace: "nasa-data-hub"
+  labels:
+    app.kubernetes.io/instance: nasa-data-hub
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/name: minio
+    app.kubernetes.io/version: 2.0.2
+    helm.sh/chart: minio-17.0.21
+    app.kubernetes.io/component: console
+    app.kubernetes.io/part-of: minio
+spec:
+  replicas: 1
+  strategy:
+    type: RollingUpdate
+  selector:
+    matchLabels:
+      app.kubernetes.io/instance: nasa-data-hub
+      app.kubernetes.io/name: minio
+      app.kubernetes.io/component: console
+      app.kubernetes.io/part-of: minio
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/instance: nasa-data-hub
+        app.kubernetes.io/managed-by: Helm
+        app.kubernetes.io/name: minio
+        app.kubernetes.io/version: 2025.7.23
+        helm.sh/chart: minio-17.0.21
+        app.kubernetes.io/component: console
+        app.kubernetes.io/part-of: minio
+    spec:
+      
+      serviceAccountName: nasa-data-hub-minio
+      automountServiceAccountToken: false
+      affinity:
+        podAffinity:
+          
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+            - podAffinityTerm:
+                labelSelector:
+                  matchLabels:
+                    app.kubernetes.io/instance: nasa-data-hub
+                    app.kubernetes.io/name: minio
+                    app.kubernetes.io/component: console
+                topologyKey: kubernetes.io/hostname
+              weight: 1
+        nodeAffinity:
+          
+      securityContext:
+        fsGroup: 1001
+        fsGroupChangePolicy: Always
+        supplementalGroups: []
+        sysctls: []
+      containers:
+        - name: console
+          image: docker.io/bitnami/minio-object-browser:2.0.2-debian-12-r3
+          imagePullPolicy: IfNotPresent
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+              - ALL
+            privileged: false
+            readOnlyRootFilesystem: true
+            runAsGroup: 1001
+            runAsNonRoot: true
+            runAsUser: 1001
+            seLinuxOptions: {}
+            seccompProfile:
+              type: RuntimeDefault
+          args:
+            - server
+            - --host
+            - "0.0.0.0"
+            - --port
+            - "9090"
+          env:
+            - name: CONSOLE_MINIO_SERVER
+              value: "http://nasa-data-hub-minio:9000"
+          resources:
+            limits:
+              cpu: 150m
+              ephemeral-storage: 2Gi
+              memory: 192Mi
+            requests:
+              cpu: 100m
+              ephemeral-storage: 50Mi
+              memory: 128Mi
+          ports:
+            - name: http
+              containerPort: 9090
+          livenessProbe:
+            failureThreshold: 5
+            initialDelaySeconds: 5
+            periodSeconds: 5
+            successThreshold: 1
+            timeoutSeconds: 5
+            tcpSocket:
+              port: http
+          readinessProbe:
+            failureThreshold: 5
+            initialDelaySeconds: 5
+            periodSeconds: 5
+            successThreshold: 1
+            timeoutSeconds: 5
+            httpGet:
+              path: /minio
+              port: http
+          volumeMounts:
+            - name: empty-dir
+              mountPath: /tmp
+              subPath: tmp-dir
+            - name: empty-dir
+              mountPath: /.console
+              subPath: app-console-dir
+      volumes:
+        - name: empty-dir
+          emptyDir: {}
+---
+# Source: nasa-data-hub/charts/verticadb-operator/templates/verticadb-operator-manager-deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    control-plane: verticadb-operator
+  name: verticadb-operator-manager
+  namespace: nasa-data-hub
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      control-plane: verticadb-operator
+  template:
+    metadata:
+      annotations:
+        kubectl.kubernetes.io/default-container: manager
+      labels:
+        app.kubernetes.io/name: verticadb-operator
+        control-plane: verticadb-operator
+    spec:
+      containers:
+      - args:
+        - --metrics-bind-address=:8443
+        - --leader-elect
+        - --health-probe-bind-address=:8081
+        command:
+        - /manager
+        env:
+        - name: OPERATOR_NAMESPACE
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.namespace
+        envFrom:
+        - configMapRef:
+            name: verticadb-operator-manager-config
+        image: 'docker.io/opentext/verticadb-operator:25.3.0-0'
+        imagePullPolicy: IfNotPresent
+        livenessProbe:
+          httpGet:
+            path: /healthz
+            port: 8081
+          initialDelaySeconds: 15
+          periodSeconds: 20
+        name: manager
+        ports:
+        - containerPort: 9443
+          name: webhook-server
+          protocol: TCP
+        readinessProbe:
+          httpGet:
+            path: /readyz
+            port: 8081
+          initialDelaySeconds: 5
+          periodSeconds: 10
+        resources:
+          limits:
+            cpu: 500m
+            memory: 512Mi
+          requests:
+            cpu: 250m
+            memory: 256Mi
+        securityContext: 
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+              - ALL
+            readOnlyRootFilesystem: true
+        volumeMounts:
+        - mountPath: /tmp
+          name: tmp
+      securityContext: 
+        fsGroup: 65532
+        runAsGroup: 65532
+        runAsNonRoot: true
+        runAsUser: 65532
+        seccompProfile:
+          type: RuntimeDefault
+      serviceAccountName: verticadb-operator-manager
+      terminationGracePeriodSeconds: 10
+      volumes:
+      - emptyDir:
+          medium: Memory
+          sizeLimit: 10Mi
+        name: tmp
+---
+# Source: nasa-data-hub/charts/preinstall/templates/job-init-directories.yaml
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: nasa-data-hub-preinstall-init-directories
+  namespace: nasa-data-hub
+  labels:
+    helm.sh/chart: preinstall-0.1.0
+    app.kubernetes.io/name: preinstall
+    app.kubernetes.io/instance: nasa-data-hub
+    app.kubernetes.io/version: "1.0.0"
+    app.kubernetes.io/managed-by: Helm
+spec:
+  template:
+    spec:
+      serviceAccountName: nasa-data-hub-preinstall-sa
+      containers:
+      - name: init-directories
+        image: busybox:1.35
+        command:
+        - /bin/sh
+        - -c
+        - |
+          mkdir -p /tmp/nasa-data-hub-minio
+          mkdir -p /tmp/nasa-data-hub-vertica-0
+          chmod 777 /tmp/nasa-data-hub-minio
+          chmod 777 /tmp/nasa-data-hub-vertica-0
+          chown -R 5000:5000 /tmp/nasa-data-hub-vertica-0
+          echo "Directories created successfully"
+        securityContext:
+          runAsUser: 0
+        volumeMounts:
+        - name: host-path
+          mountPath: /tmp
+      volumes:
+      - name: host-path
+        hostPath:
+          path: /tmp
+          type: Directory
+      restartPolicy: Never
+  backoffLimit: 3
+---
+# Source: nasa-data-hub/templates/verticadb.yaml
+apiVersion: vertica.com/v1
+kind: VerticaDB
+metadata:
+  name: nasa-data-hub-vertica
+  namespace: nasa-data-hub
+  annotations:
+    vertica.com/k-safety: "0"
+  labels:
+    helm.sh/chart: nasa-data-hub-0.1.0
+    app.kubernetes.io/name: nasa-data-hub
+    app.kubernetes.io/instance: nasa-data-hub
+    app.kubernetes.io/version: "1.0.0"
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/component: database
+spec:
+  image: "opentext/vertica-k8s:25.3.0-0"
+  dbName: "nasa_data"
+  initPolicy: Create
+  subclusters:
+  - name: primarysubcluster
+    size: 1
+    type: primary
+    serviceName: nasa-data-hub-vertica
+  communal:
+    path: "s3://nasa-data-hub-vertica"
+    endpoint: "http://nasa-data-hub-minio:9000"
+    credentialSecret: "nasa-data-hub-vertica-creds"
+    region: ""
+    s3ServerSideEncryption: ""
+  local:
+    requestSize: 50Gi
+    storageClass: local-storage
+---
+# Source: nasa-data-hub/charts/metabase/templates/job-setup-database.yaml
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: nasa-data-hub-metabase-setup-database
+  namespace: nasa-data-hub
+  labels:
+    helm.sh/chart: metabase-0.1.0
+    app.kubernetes.io/name: metabase
+    app.kubernetes.io/instance: nasa-data-hub
+    app.kubernetes.io/version: "1.0.0"
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/component: setup
+  annotations:
+    "helm.sh/hook": post-install,post-upgrade
+    "helm.sh/hook-weight": "0"
+    "helm.sh/hook-delete-policy": before-hook-creation,hook-succeeded
+spec:
+  template:
+    metadata:
+      labels:
+        helm.sh/chart: metabase-0.1.0
+        app.kubernetes.io/name: metabase
+        app.kubernetes.io/instance: nasa-data-hub
+        app.kubernetes.io/version: "1.0.0"
+        app.kubernetes.io/managed-by: Helm
+        app.kubernetes.io/component: setup
+    spec:
+      serviceAccountName: nasa-data-hub-metabase
+      restartPolicy: OnFailure
+      containers:
+      - name: setup-database
+        image: curlimages/curl:latest
+        imagePullPolicy: IfNotPresent
+        env:
+        - name: METABASE_URL
+          value: "http://nasa-data-hub-metabase:3000"
+        - name: ADMIN_EMAIL
+          value: "admin@nasa-data-hub.local"
+        - name: ADMIN_PASSWORD
+          value: "nasa-data-hub-2024"
+        - name: ADMIN_FIRST_NAME
+          value: "Admin"
+        - name: ADMIN_LAST_NAME
+          value: "User"
+        - name: VERTICA_HOST
+          value: "nasa-data-hub-vertica-nasa-data-hub-vertica"
+        - name: VERTICA_PORT
+          value: "5433"
+        - name: VERTICA_DATABASE
+          value: "nasa_data"
+        - name: VERTICA_USER
+          value: "dbadmin"
+        - name: VERTICA_PASSWORD
+          value: "vertica-password-2024"
+        command:
+        - /bin/sh
+        - -c
+        - |
+          # Function to get session token or setup token
+          get_session_token() {
+            local max_attempts=5
+            local attempt=1
+            
+            while [ $attempt -le $max_attempts ]; do
+              echo "Attempt $attempt: Checking Metabase status..."
+              
+              # Check if Metabase is ready and get setup status
+              local setup_response=$(curl -s -w "%{http_code}" \
+                "$METABASE_URL/api/session/properties" 2>/dev/null)
+              
+              local setup_http_code="${setup_response: -3}"
+              local setup_body="${setup_response%???}"
+              
+              if [ "$setup_http_code" = "200" ]; then
+                # Check if Metabase is configured
+                local has_user_setup=$(echo "$setup_body" | grep -o '"has-user-setup":[^,]*' | grep -o 'true\|false')
+                echo "Has user setup: $has_user_setup"
+                
+                if [ "$has_user_setup" = "true" ]; then
+                  echo "Metabase is configured, trying to login..."
+                  # Try to login
+                  local login_response=$(curl -s -w "%{http_code}" -X POST \
+                    -H "Content-Type: application/json" \
+                    -d "{\"username\":\"$ADMIN_EMAIL\",\"password\":\"$ADMIN_PASSWORD\"}" \
+                    "$METABASE_URL/api/session" 2>/dev/null)
+                  
+                  local login_http_code="${login_response: -3}"
+                  local login_body="${login_response%???}"
+                  
+                  if [ "$login_http_code" = "200" ]; then
+                    echo "Login successful, extracting session token..."
+                    echo "$login_body" | grep -o '"id":"[^"]*"' | cut -d'"' -f4
+                    return 0
+                  else
+                    echo "Login failed with code: $login_http_code"
+                    # If login fails, we need to setup Metabase
+                    echo "Login failed, will try setup instead"
+                    return 1
+                  fi
+                else
+                  echo "Metabase needs setup, getting setup token..."
+                  local setup_token=$(echo "$setup_body" | grep -o '"setup-token":"[^"]*"' | cut -d'"' -f4)
+                  if [ -n "$setup_token" ] && [ "$setup_token" != "null" ]; then
+                    echo "Setup token found: $setup_token"
+                    echo "$setup_token"
+                    return 0
+                  else
+                    echo "No setup token found in response"
+                  fi
+                fi
+              else
+                echo "Failed to get setup status, response code: $setup_http_code"
+              fi
+              
+              if [ $attempt -lt $max_attempts ]; then
+                echo "Waiting before retry..."
+                sleep 3
+              fi
+              
+              attempt=$((attempt + 1))
+            done
+            
+            echo "Failed to get session token after $max_attempts attempts"
+            return 1
+          }
+          
+          # Function to setup Metabase
+          setup_metabase() {
+            local setup_token=$1
+            
+            echo "Setting up Metabase with admin user..."
+            
+            local setup_data="{\"token\":\"$setup_token\",\"user\":{\"first_name\":\"$ADMIN_FIRST_NAME\",\"last_name\":\"$ADMIN_LAST_NAME\",\"email\":\"$ADMIN_EMAIL\",\"password\":\"$ADMIN_PASSWORD\"},\"prefs\":{\"site_name\":\"NASA Data Hub\",\"site_locale\":\"en\",\"allow_tracking\":false}}"
+            
+            local setup_response=$(curl -s -w "%{http_code}" -X POST \
+              -H "Content-Type: application/json" \
+              -d "$setup_data" \
+              "$METABASE_URL/api/setup" 2>/dev/null)
+            
+            local http_code="${setup_response: -3}"
+            local response_body="${setup_response%???}"
+            
+            if [ "$http_code" = "200" ]; then
+              echo "Metabase setup completed successfully!"
+              echo "$response_body" | grep -o '"id":"[^"]*"' | cut -d'"' -f4
+              return 0
+            else
+              echo "Setup failed with HTTP code: $http_code"
+              echo "Response: $response_body"
+              return 1
+            fi
+          }
+          
+          # Main execution
+          echo "Starting Metabase setup..."
+          
+          # Wait for Metabase to be ready (shorter timeout)
+          echo "Waiting for Metabase to be ready..."
+          for i in 1 2 3 4 5 6 7 8 9 10 11 12; do
+            if curl -s "$METABASE_URL/api/health" > /dev/null 2>&1; then
+              echo "Metabase is ready!"
+              break
+            fi
+            echo "Waiting for Metabase... ($i/12)"
+            sleep 5
+            if [ $i -eq 12 ]; then
+              echo "Metabase not ready after 60 seconds, proceeding anyway..."
+            fi
+          done
+          
+          echo "Attempting to get session token..."
+          
+          # Get session token or setup token
+          token=$(get_session_token)
+          if [ $? -eq 0 ] && [ -n "$token" ]; then
+            # Check if this is a setup token (UUID format) or session token
+            if [[ "$token" =~ ^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$ ]]; then
+              echo "Setup token obtained, proceeding with setup..."
+              session_token=$(setup_metabase "$token")
+              if [ $? -eq 0 ]; then
+                echo "✅ Metabase setup completed successfully!"
+                echo ""
+                echo "🔧 NEXT STEP: Manual Vertica Database Configuration Required"
+                echo "=========================================================="
+                echo "Metabase is now configured and ready for use."
+                echo "To complete the setup, you need to manually add the Vertica database:"
+                echo ""
+                echo "1. Access Metabase at: http://localhost:3000"
+                echo "2. Login with: $ADMIN_EMAIL / $ADMIN_PASSWORD"
+                echo "3. Go to Admin > Databases > Add Database"
+                echo "4. Select 'Vertica' as the database type"
+                echo "5. Use these connection details:"
+                echo "   - Host: $VERTICA_HOST"
+                echo "   - Port: $VERTICA_PORT"
+                echo "   - Database: $VERTICA_DATABASE"
+                echo "   - Username: $VERTICA_USER"
+                echo "   - Password: $VERTICA_PASSWORD"
+                echo "   - SSL: false"
+                echo ""
+                echo "✅ Setup job completed successfully!"
+                exit 0
+              else
+                echo "❌ Metabase setup failed!"
+                exit 1
+              fi
+            else
+              echo "Session token obtained, Metabase is already configured"
+              echo "✅ Metabase is ready for use!"
+              echo ""
+              echo "🔧 NEXT STEP: Manual Vertica Database Configuration Required"
+              echo "=========================================================="
+              echo "Metabase is already configured and ready for use."
+              echo "To complete the setup, you need to manually add the Vertica database:"
+              echo ""
+              echo "1. Access Metabase at: http://localhost:3000"
+              echo "2. Login with: $ADMIN_EMAIL / $ADMIN_PASSWORD"
+              echo "3. Go to Admin > Databases > Add Database"
+              echo "4. Select 'Vertica' as the database type"
+              echo "5. Use these connection details:"
+              echo "   - Host: $VERTICA_HOST"
+              echo "   - Port: $VERTICA_PORT"
+              echo "   - Database: $VERTICA_DATABASE"
+              echo "   - Username: $VERTICA_USER"
+              echo "   - Password: $VERTICA_PASSWORD"
+              echo "   - SSL: false"
+              echo ""
+              echo "✅ Setup job completed successfully!"
+              exit 0
+            fi
+          else
+            echo "❌ Failed to get session token or setup token"
+            exit 1
+          fi
+        resources:
+          limits:
+            cpu: 200m
+            memory: 256Mi
+          requests:
+            cpu: 100m
+            memory: 128Mi
+  backoffLimit: 3
