@@ -29,7 +29,7 @@ The system consists of four main components:
 
 ## Quick Start
 
-### 1. Install the chart
+### 1. Deploy NASA Data Hub
 
 **Option 1: Using deployment script (RECOMMENDED)**
 ```bash
@@ -42,8 +42,8 @@ The system consists of four main components:
 # Basic installation
 helm install nasa-data-hub . --namespace nasa-data-hub --create-namespace
 
-# With custom values
-helm install nasa-data-hub . -f values-prod.yaml --namespace nasa-data-hub --create-namespace
+# With custom values (if you have custom values file)
+helm install nasa-data-hub . -f values-custom.yaml --namespace nasa-data-hub --create-namespace
 ```
 
 **Note:** If you encounter "data: Too long" error with Helm, use the deployment script instead.
@@ -51,8 +51,13 @@ helm install nasa-data-hub . -f values-prod.yaml --namespace nasa-data-hub --cre
 ### 2. Check installation status
 
 ```bash
-helm status nasa-data-hub -n nasa-data-hub
+# Check all resources
+kubectl get all -n nasa-data-hub
+
+# Check specific component status
 kubectl get pods -n nasa-data-hub
+kubectl get services -n nasa-data-hub
+kubectl get pvc -n nasa-data-hub
 ```
 
 ## Configuration
@@ -62,21 +67,21 @@ kubectl get pods -n nasa-data-hub
 | Parameter | Description | Default Value |
 |-----------|-------------|---------------|
 | `minio.enabled` | Enable/disable MinIO | `true` |
-| `vertica-operator.enabled` | Enable/disable Vertica Operator | `true` |
-| `vertica.enabled` | Enable/disable Vertica | `true` |
+| `verticadb-operator.enabled` | Enable/disable Vertica Operator | `true` |
+| `verticadb.enabled` | Enable/disable Vertica | `true` |
 | `metabase.enabled` | Enable/disable Metabase | `true` |
 
 ### Storage Configuration
 
-Adjust Storage Class for your cluster:
+Adjust Storage Class for your cluster in `values.yaml`:
 
 ```yaml
 minio:
   persistence:
-    storageClass: "your-storage-class"
-vertica:
+    storageClass: "local-storage"
+verticadb:
   persistence:
-    storageClass: "your-storage-class"
+    storageClass: "local-storage"
 ```
 
 ## Access to Components
@@ -89,7 +94,7 @@ kubectl port-forward svc/nasa-data-hub-minio-console 9090:9090 -n nasa-data-hub
 
 Open http://localhost:9090 in your browser
 - Username: `admin`
-- Password: `nasa-data-hub-2024`
+- Password: `nasa-data-hub-2025`
 
 ### Metabase
 
@@ -100,8 +105,8 @@ kubectl port-forward svc/nasa-data-hub-metabase 3000:3000 -n nasa-data-hub
 Open http://localhost:3000 in your browser
 
 **Login Credentials:**
-- Email: `admin@nasa-data-hub.local`
-- Password: `nasa-data-hub-2024`
+- Email: `admin@nasa-data-hub.com`
+- Password: `NasaDataHub2024!`
 
 **Note:** Metabase is automatically configured during deployment with Vertica database connection. No manual setup required.
 
@@ -140,20 +145,20 @@ kubectl get pvc -n nasa-data-hub
 
 ```bash
 # MinIO logs
-kubectl logs -l app.kubernetes.io/component=storage -n nasa-data-hub
+kubectl logs -l app.kubernetes.io/name=minio -n nasa-data-hub
 
 # Vertica Operator logs
-kubectl logs -l app.kubernetes.io/component=operator -n nasa-data-hub
+kubectl logs -l app.kubernetes.io/name=verticadb-operator -n nasa-data-hub
 
 # Metabase logs
-kubectl logs -l app.kubernetes.io/component=visualization -n nasa-data-hub
+kubectl logs -l app.kubernetes.io/name=metabase -n nasa-data-hub
 ```
 
 ## Data Structure
 
 ### MinIO Buckets
 
-- `nasa-eonet-data` - Raw data from NASA EONET API
+- `nasa-data-hub-vertica` - Default bucket for data storage
 
 ### Vertica Tables
 
@@ -204,7 +209,9 @@ kubectl logs job/nasa-data-hub-metabase-setup-database -n nasa-data-hub
 ## Updating
 
 ```bash
-helm upgrade nasa-data-hub . -n nasa-data-hub
+# Regenerate and apply manifests
+helm template nasa-data-hub . -n nasa-data-hub > nasa-data-hub-manifest.yaml
+kubectl apply -f nasa-data-hub-manifest.yaml
 ```
 
 ## Uninstalling
@@ -216,8 +223,30 @@ helm upgrade nasa-data-hub . -n nasa-data-hub
 
 **Option 2: Manual cleanup**
 ```bash
-helm uninstall nasa-data-hub -n nasa-data-hub
+# Delete all resources
+kubectl delete -f nasa-data-hub-manifest.yaml
+
+# Delete namespace
 kubectl delete namespace nasa-data-hub
+
+# Clean up host paths (if using local storage)
+sudo rm -rf /tmp/nasa-data-hub-*
+```
+
+## Project Structure
+
+```
+nasa-data-hub-deployment/
+├── charts/                    # Sub-charts for components
+│   ├── metabase/             # Metabase Helm chart
+│   ├── minio/                # MinIO Helm chart
+│   ├── verticadb-operator/   # Vertica Operator chart
+│   └── preinstall/           # Preinstall resources
+├── templates/                 # Main chart templates
+├── values.yaml               # Main configuration
+├── deploy.sh                 # Deployment script
+├── cleanup.sh                # Cleanup script
+└── README.md                 # This file
 ```
 
 ## Next Steps
