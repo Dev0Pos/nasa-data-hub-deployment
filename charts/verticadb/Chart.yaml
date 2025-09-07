@@ -1,0 +1,10 @@
+apiVersion: v2
+name: verticadb
+description: A Helm chart for VerticaDB
+type: application
+version: 0.1.0
+appVersion: "1.0.0"
+dependencies:
+  - name: verticadb-operator
+    version: 25.3.0-0
+    repository: file://../verticadb-operator

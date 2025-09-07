@@ -6,6 +6,37 @@ global:
   environment: production
   namespaceOverride: ""
   initPolicy: "Create"  # VerticaDB initialization policy: "Create" or "Revive"
+  
+  # Global Vertica database configuration
+  vertica:
+    host: "nasa-data-hub-verticadb-nasa-data-hub-verticadb"
+    port: 5433
+    database: "nasa_data"
+    user: "dbadmin"
+    password: "vertica-password-2024"
+    replicaCount: 1
+    image:
+      repository: "opentext/vertica-k8s"
+      tag: "25.3.0-0"
+  
+  # Global MinIO configuration
+  minio:
+    rootUser: "admin"
+    rootPassword: "nasa-data-hub-2025"
+    defaultBuckets: "nasa-data-hub-vertica"
+  
+  # Global Metabase configuration
+  metabase:
+    adminEmail: "admin@nasa-data-hub.com"
+    adminPassword: "NasaDataHub2024!"
+    encryptionSecretKey: "nasa-data-hub-metabase-secret-key-2024"
+  
+  # Global storage configuration
+  storage:
+    class: "local-storage"
+    minioSize: "100Gi"
+    verticaSize: "50Gi"
+    metabaseSize: "10Gi"
 
 # MinIO Configuration
 minio:
@@ -15,7 +46,7 @@ minio:
     rootPassword: "nasa-data-hub-2025"
   persistence:
     enabled: true
-    size: 100Gi
+    size: "100Gi"
     storageClass: "local-storage"
   service:
     type: ClusterIP
@@ -29,7 +60,6 @@ minio:
       memory: 1Gi
       cpu: 500m
   defaultBuckets: "nasa-data-hub-vertica"
-  # ServiceAccount configuration
   serviceAccount:
     create: true
     automountServiceAccountToken: true
@@ -63,7 +93,7 @@ verticadb:
     password: "vertica-password-2024"
   persistence:
     enabled: true
-    size: 50Gi
+    size: "50Gi"
     storageClass: "local-storage"
   resources:
     limits:
@@ -116,7 +146,7 @@ metabase:
     databaseUser: ""
     databasePassword: ""
     # Vertica connection configuration
-    verticaHost: "nasa-data-hub-vertica-nasa-data-hub-vertica"
+    verticaHost: "nasa-data-hub-verticadb-nasa-data-hub-verticadb"
     verticaPort: "5433"
     verticaDatabase: "nasa_data"
     verticaUser: "dbadmin"
@@ -124,7 +154,7 @@ metabase:
   
   # Vertica database configuration for Metabase
   vertica:
-    host: "nasa-data-hub-vertica-nasa-data-hub-vertica"
+    host: "nasa-data-hub-verticadb-nasa-data-hub-verticadb"
     port: 5433
     database: "nasa_data"
     username: "dbadmin"
@@ -162,6 +192,11 @@ preinstall:
       size: "50Gi"
       basePath: "/tmp/nasa-data-hub-vertica"
       baseName: "nasa-data-hub-vertica-pv"
+    metabase:
+      enabled: true
+      name: "nasa-data-hub-metabase-data-pv"
+      size: "10Gi"
+      path: "/tmp/nasa-data-hub-metabase-data"
   storageClass:
     enabled: true
     name: "local-storage"

@@ -23,12 +23,20 @@ dependencies:
   - name: preinstall
     version: 0.1.0
     repository: file://charts/preinstall
-  - name: minio
-    version: 17.0.21
-    repository: file://charts/minio
+    condition: preinstall.enabled
   - name: verticadb-operator
     version: 25.3.0-0
     repository: file://charts/verticadb-operator
+    condition: verticadb-operator.enabled
+  - name: verticadb
+    version: 0.1.0
+    repository: file://charts/verticadb
+    condition: verticadb.enabled
+  - name: minio
+    version: 17.0.21
+    repository: file://charts/minio
+    condition: minio.enabled
   - name: metabase
     version: 0.1.0
     repository: file://charts/metabase
+    condition: metabase.enabled

@@ -1,0 +1,33 @@
+{{- if .Values.enabled }}
+apiVersion: vertica.com/v1
+kind: VerticaDB
+metadata:
+  name: {{ include "verticadb.fullname" . }}
+  namespace: {{ .Release.Namespace }}
+  annotations:
+    vertica.com/k-safety: "0"
+  labels:
+    {{- include "verticadb.labels" . | nindent 4 }}
+spec:
+  image: "{{ .Values.image.repository | default .Values.global.vertica.image.repository | default "opentext/vertica-k8s" }}:{{ .Values.image.tag | default .Values.global.vertica.image.tag | default "25.3.0-0" }}"
+  dbName: "{{ .Values.database.name | default .Values.global.vertica.database | default "nasa_data" }}"
+  {{- $initPolicy := .Values.initPolicy | default .Values.global.initPolicy | default "Create" }}
+  initPolicy: {{ $initPolicy }}
+  subclusters:
+  - name: primarysubcluster
+    size: {{ .Values.replicaCount | default .Values.global.vertica.replicaCount | default 1 }}
+    type: primary
+    serviceName: {{ include "verticadb.fullname" . }}
+  communal:
+    path: "s3://{{ .Values.communal.bucket | default .Values.global.minio.defaultBuckets | default "nasa-data-hub-vertica" }}"
+    endpoint: "{{ .Values.communal.endpoint | default "http://nasa-data-hub-minio:9000" }}"
+    credentialSecret: "nasa-data-hub-vertica-creds"
+    region: "{{ .Values.communal.region | default "" }}"
+    s3ServerSideEncryption: "{{ .Values.communal.s3ServerSideEncryption | default "" }}"
+  local:
+    requestSize: {{ .Values.persistence.size | default .Values.global.storage.verticaSize | default "50Gi" }}
+    {{- $storageClass := .Values.persistence.storageClass | default .Values.global.storage.class | default "local-storage" }}
+    {{- if $storageClass }}
+    storageClass: {{ $storageClass }}
+    {{- end }}
+{{- end }}

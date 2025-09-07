@@ -1,0 +1,57 @@
+# VerticaDB Configuration
+# This file inherits values from the main values.yaml file
+# Override only specific values if needed
+
+# Inherit from main values.yaml
+enabled: true
+
+# Image configuration from main values
+image:
+  repository: opentext/vertica-k8s
+  tag: "25.3.0-0"
+  pullPolicy: IfNotPresent
+
+# Replica count from main values
+replicaCount: 1
+
+# Database configuration from main values
+database:
+  name: "nasa_data"
+
+# Initialization policy from global values
+initPolicy: "Create"
+
+# Communal storage configuration (MinIO)
+communal:
+  bucket: "nasa-data-hub-vertica"
+  endpoint: "http://nasa-data-hub-minio:9000"
+  region: ""
+  s3ServerSideEncryption: ""
+
+# Persistence configuration from main values
+persistence:
+  enabled: true
+  size: "50Gi"
+  storageClass: "local-storage"
+
+# Resource limits from main values
+resources:
+  limits:
+    memory: "4Gi"
+    cpu: "2000m"
+  requests:
+    memory: "2Gi"
+    cpu: "1000m"
+
+# Service configuration from main values
+service:
+  type: "ClusterIP"
+  port: 5433
+
+# Authentication from main values
+auth:
+  password: "vertica-password-2024"
+
+# Name override
+nameOverride: ""
+fullnameOverride: ""

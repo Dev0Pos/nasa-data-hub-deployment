@@ -31,6 +31,9 @@ serviceAccountAnnotations: {}
 serviceAccount:
   create: true
 
+# Setup database job configuration
+setupDatabase: true
+
 # Pod annotations
 podAnnotations: {}
 
@@ -103,7 +106,37 @@ jdbc:
   # URL to download Vertica JDBC driver from
   downloadUrl: "https://www.vertica.com/client_drivers/24.2.x/24.2.0-1/vertica-jdbc-24.2.0-1.jar"
 
-
+# Init containers configuration
+initContainers:
+  # Wait for Vertica to be ready
+  waitForVertica:
+    enabled: true
+    image:
+      repository: busybox
+      tag: "1.35"
+      pullPolicy: IfNotPresent
+    resources:
+      limits:
+        memory: 64Mi
+        cpu: 100m
+      requests:
+        memory: 32Mi
+        cpu: 50m
+  
+  # Download JDBC driver
+  downloadJdbcDriver:
+    enabled: true
+    image:
+      repository: curlimages/curl
+      tag: "latest"
+      pullPolicy: IfNotPresent
+    resources:
+      limits:
+        memory: 128Mi
+        cpu: 200m
+      requests:
+        memory: 64Mi
+        cpu: 100m
 
 # Liveness probe configuration
 livenessProbe:
@@ -138,29 +171,3 @@ volumes: []
 # - name: custom-config
 #   configMap:
 #     name: metabase-custom-config
-
-# Automatic database setup
-setup:
-  # Automatically add Vertica as a data source
-  autoAddDatabase: false
-  # Wait for Metabase to be ready before adding database
-  waitForMetabase: true
-  # Admin user configuration
-  admin:
-    email: "admin@nasa-data-hub.local"
-    password: "nasa-data-hub-2024"
-    firstName: "Admin"
-    lastName: "User"
-  # Site configuration
-  site:
-    name: "NASA Data Hub"
-    locale: "en"
-    allowTracking: false
-
-# Vertica database configuration
-vertica:
-  host: "nasa-data-hub-vertica-nasa-data-hub-vertica"
-  port: 5433
-  database: "nasa_data"
-  username: "dbadmin"
-  password: "vertica-password-2024"
