@@ -1,2 +1,6 @@
 # Helm package files
 *.tgz
+
+# Git files
+.git/
+.gitignore

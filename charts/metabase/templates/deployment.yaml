@@ -43,33 +43,28 @@ spec:
       tolerations:
         {{- toYaml . | nindent 8 }}
       {{- end }}
+      {{- if or .Values.initContainers.waitForVertica.enabled .Values.initContainers.downloadJdbcDriver.enabled }}
       initContainers:
+      {{- if .Values.initContainers.waitForVertica.enabled }}
       - name: wait-for-vertica
-        image: busybox:1.35
-        imagePullPolicy: IfNotPresent
-        command: ['sh', '-c', 'until wget -q --spider {{ .Values.config.verticaHost }}:{{ .Values.config.verticaPort }} 2>/dev/null || nc -z {{ .Values.config.verticaHost }} {{ .Values.config.verticaPort }} 2>/dev/null; do echo waiting for vertica; sleep 2; done;']
+        image: {{ .Values.initContainers.waitForVertica.image.repository }}:{{ .Values.initContainers.waitForVertica.image.tag }}
+        imagePullPolicy: {{ .Values.initContainers.waitForVertica.image.pullPolicy }}
+        command: ['sh', '-c', 'until nc -z {{ .Values.config.verticaHost }} {{ .Values.config.verticaPort }}; do echo waiting for vertica; sleep 2; done;']
         resources:
-          limits:
-            memory: 64Mi
-            cpu: 100m
-          requests:
-            memory: 32Mi
-            cpu: 50m
+          {{- toYaml .Values.initContainers.waitForVertica.resources | nindent 10 }}
+      {{- end }}
+      {{- if .Values.initContainers.downloadJdbcDriver.enabled }}
       - name: download-jdbc-driver
-        image: curlimages/curl:latest
-        imagePullPolicy: IfNotPresent
-        command: ['sh', '-c', 'curl -L -o /plugins/vertica-jdbc-24.2.0-1.jar https://www.vertica.com/client_drivers/24.2.x/24.2.0-1/vertica-jdbc-24.2.0-1.jar']
+        image: {{ .Values.initContainers.downloadJdbcDriver.image.repository }}:{{ .Values.initContainers.downloadJdbcDriver.image.tag }}
+        imagePullPolicy: {{ .Values.initContainers.downloadJdbcDriver.image.pullPolicy }}
+        command: ['sh', '-c', 'curl -L -o /jdbc-drivers/vertica-jdbc-24.2.0-1.jar {{ .Values.jdbc.downloadUrl }}']
         volumeMounts:
         - name: jdbc-drivers
-          mountPath: /plugins
+          mountPath: /jdbc-drivers
         resources:
-          limits:
-            memory: 128Mi
-            cpu: 200m
-          requests:
-            memory: 64Mi
-            cpu: 100m
-
+          {{- toYaml .Values.initContainers.downloadJdbcDriver.resources | nindent 10 }}
+      {{- end }}
+      {{- end }}
       containers:
       - name: metabase
         image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
@@ -86,8 +81,6 @@ spec:
               key: encryption-secret-key
         - name: MB_DB_TYPE
           value: {{ .Values.config.databaseType | quote }}
-        - name: MB_PLUGINS_DIR
-          value: "/plugins"
         {{- if .Values.config.databaseHost }}
         - name: MB_DB_HOST
           value: {{ .Values.config.databaseHost | quote }}
@@ -111,7 +104,6 @@ spec:
               name: {{ include "metabase.secretName" . }}
               key: database-password
         {{- end }}
-
         {{- with .Values.env }}
         {{- toYaml . | nindent 8 }}
         {{- end }}
@@ -145,18 +137,14 @@ spec:
         {{- end }}
         volumeMounts:
         - name: jdbc-drivers
-          mountPath: /plugins
-        - name: metabase-data
-          mountPath: /metabase.db
+          mountPath: /plugins/vertica-jdbc-24.2.0-1.jar
+          subPath: vertica-jdbc-24.2.0-1.jar
         {{- with .Values.volumeMounts }}
         {{- toYaml . | nindent 8 }}
         {{- end }}
       volumes:
       - name: jdbc-drivers
         emptyDir: {}
-      - name: metabase-data
-        persistentVolumeClaim:
-          claimName: {{ include "metabase.fullname" . }}-data
       {{- with .Values.volumes }}
       {{- toYaml . | nindent 6 }}
       {{- end }}

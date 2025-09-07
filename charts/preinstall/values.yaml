@@ -4,7 +4,7 @@
 # StorageClass Configuration
 storageClass:
   enabled: true
-  name: "local-storage"
+  name: "{{ .Values.global.storage.class }}"
   isDefault: true
   provisioner: "kubernetes.io/no-provisioner"
   volumeBindingMode: "WaitForFirstConsumer"
@@ -17,14 +17,14 @@ persistentVolumes:
   minio:
     enabled: true
     name: "nasa-data-hub-minio-pv"
-    size: "100Gi"
+    size: "{{ .Values.global.storage.minioSize }}"
     path: "/tmp/nasa-data-hub-minio"
     
   # Vertica PersistentVolumes
   vertica:
     enabled: true
     count: 1  # Number of PVs to create (integer)
-    size: "50Gi"
+    size: "{{ .Values.global.storage.verticaSize }}"
     basePath: "/tmp/nasa-data-hub-vertica"
     baseName: "nasa-data-hub-vertica-pv"
     
@@ -32,7 +32,7 @@ persistentVolumes:
   metabaseData:
     enabled: true
     name: "nasa-data-hub-metabase-data-pv"
-    size: "1Gi"
+    size: "{{ .Values.global.storage.metabaseSize }}"
     path: "/tmp/nasa-data-hub-metabase-data"
 
 # Directory Creation

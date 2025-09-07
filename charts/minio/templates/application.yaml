@@ -149,10 +149,11 @@ spec:
                   key: {{ include "minio.rootPasswordKey" . }}
             {{- end }}
             - name: MINIO_SKIP_CLIENT
-              value: {{ ternary "yes" "no" (empty .Values.defaultBuckets) | quote }}
-            {{- if .Values.defaultBuckets }}
+              value: {{ ternary "yes" "no" (empty (.Values.defaultBuckets | default .Values.global.minio.defaultBuckets)) | quote }}
+            {{- $defaultBuckets := .Values.defaultBuckets | default .Values.global.minio.defaultBuckets }}
+            {{- if $defaultBuckets }}
             - name: MINIO_DEFAULT_BUCKETS
-              value: {{ .Values.defaultBuckets }}
+              value: {{ $defaultBuckets }}
             {{- end }}
             - name: MINIO_API_PORT_NUMBER
               value: {{ .Values.containerPorts.api | quote }}
