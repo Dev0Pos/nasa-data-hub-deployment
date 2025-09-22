@@ -82,7 +82,7 @@ spec:
                   \"first_name\": \"Admin\",
                   \"last_name\": \"User\",
                   \"email\": \"admin@nasa-data-hub.com\",
-                  \"password\": \"NasaDataHub2024!\"
+                  \"password\": \"CHANGE_ME_METABASE_PASSWORD\"
                 },
                 \"prefs\": {
                   \"site_name\": \"NASA Data Hub\",
@@ -106,7 +106,7 @@ spec:
             -H "Content-Type: application/json" \
             -d "{
               \"username\": \"admin@nasa-data-hub.com\",
-              \"password\": \"NasaDataHub2024!\"
+              \"password\": \"CHANGE_ME_METABASE_PASSWORD\"
             }")
           
           SESSION_TOKEN=$(echo "$SESSION_RESPONSE" | grep -o '"id":"[^"]*"' | cut -d'"' -f4)
@@ -127,11 +127,11 @@ spec:
               \"name\": \"NASA Data Hub Vertica\",
               \"engine\": \"vertica\",
               \"details\": {
-                \"host\": \"{{ .Values.vertica.host }}\",
-                \"port\": {{ .Values.vertica.port }},
-                \"dbname\": \"{{ .Values.vertica.database }}\",
-                \"user\": \"{{ .Values.vertica.username }}\",
-                \"password\": \"{{ .Values.vertica.password }}\",
+                \"host\": \"{{ .Values.config.verticaHost }}\",
+                \"port\": {{ .Values.config.verticaPort }},
+                \"dbname\": \"{{ .Values.config.verticaDatabase }}\",
+                \"user\": \"{{ .Values.config.verticaUser }}\",
+                \"password\": \"{{ .Values.config.verticaPassword }}\",
                 \"ssl\": false
               }
             }")
@@ -146,7 +146,7 @@ spec:
           echo "Metabase setup completed successfully!"
           echo "You can now login with:"
           echo "  Email: admin@nasa-data-hub.com"
-          echo "  Password: NasaDataHub2024!"
+          echo "  Password: CHANGE_ME_METABASE_PASSWORD"
         resources:
           limits:
             memory: 128Mi

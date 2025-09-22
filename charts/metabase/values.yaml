@@ -17,7 +17,7 @@
 image:
   repository: metabase/metabase
   tag: "v0.53.18"
-  pullPolicy: IfNotPresent
+  pullPolicy: Always
 
 imagePullSecrets: []
 
@@ -82,7 +82,7 @@ affinity: {}
 # Metabase configuration
 config:
   # Encryption secret key for Metabase
-  encryptionSecretKey: "nasa-data-hub-metabase-secret-key-2024"
+  encryptionSecretKey: "CHANGE_ME_METABASE_SECRET_KEY"
   
   # Application database configuration (H2 for internal Metabase data)
   databaseType: "h2"
@@ -97,7 +97,7 @@ config:
   verticaPort: "5433"
   verticaDatabase: "nasa_data"
   verticaUser: "dbadmin"
-  verticaPassword: "vertica-password-2024"
+  verticaPassword: "CHANGE_ME_VERTICA_PASSWORD"
 
 # JDBC driver configuration
 jdbc:
@@ -114,7 +114,7 @@ initContainers:
     image:
       repository: busybox
       tag: "1.35"
-      pullPolicy: IfNotPresent
+      pullPolicy: Always
     resources:
       limits:
         memory: 64Mi
@@ -129,7 +129,7 @@ initContainers:
     image:
       repository: curlimages/curl
       tag: "latest"
-      pullPolicy: IfNotPresent
+      pullPolicy: Always
     resources:
       limits:
         memory: 128Mi

@@ -13,6 +13,7 @@ echo "🧹 Cleaning up NASA Data Hub..."
 # Stop port-forward if running
 echo "🛑 Stopping port-forward processes..."
 pkill -f "kubectl port-forward.*nasa-data-hub" || true
+# NASA ETL is now a CronJob, no port-forward needed
 
 # Clean up MinIO buckets before uninstalling
 echo "🧹 Cleaning up MinIO buckets..."
@@ -22,7 +23,7 @@ kubectl wait --for=condition=ready pod -l app.kubernetes.io/name=minio -n $NAMES
 # Use MinIO client to remove buckets
 kubectl run minio-cleanup --rm -i --restart=Never --image=bitnami/minio-client:latest -n $NAMESPACE -- \
   sh -c "
-    mc alias set nasa-minio http://nasa-data-hub-minio:9000 admin nasa-data-hub-2025 || true
+    mc alias set nasa-minio http://nasa-data-hub-minio:9000 admin CHANGE_ME_MINIO_PASSWORD || true
     mc rm --recursive --force nasa-minio/nasa-data-hub-vertica || true
     mc rb --force nasa-minio/nasa-data-hub-vertica || true
   " || true

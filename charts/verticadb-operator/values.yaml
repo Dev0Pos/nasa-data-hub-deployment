@@ -27,7 +27,7 @@
 image:
   repo: docker.io
   name: opentext/verticadb-operator:25.3.0-0
-  pullPolicy: IfNotPresent
+  pullPolicy: Always
 
 imagePullSecrets: null
 

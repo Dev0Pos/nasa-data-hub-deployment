@@ -40,3 +40,7 @@ dependencies:
     version: 0.1.0
     repository: file://charts/metabase
     condition: metabase.enabled
+  - name: nasa-etl
+    version: 0.1.0
+    repository: file://charts/nasa-etl
+    condition: nasa-etl.enabled

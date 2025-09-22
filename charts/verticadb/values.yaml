@@ -9,7 +9,7 @@ enabled: true
 image:
   repository: opentext/vertica-k8s
   tag: "25.3.0-0"
-  pullPolicy: IfNotPresent
+  pullPolicy: Always
 
 # Replica count from main values
 replicaCount: 1
@@ -50,7 +50,7 @@ service:
 
 # Authentication from main values
 auth:
-  password: "vertica-password-2024"
+  password: "CHANGE_ME_VERTICA_PASSWORD"
 
 # Name override
 nameOverride: ""

@@ -83,7 +83,7 @@ image:
   ## Specify a imagePullPolicy
   ## ref: https://kubernetes.io/docs/concepts/containers/images/#pre-pulled-images
   ##
-  pullPolicy: IfNotPresent
+  pullPolicy: Always
   ## Optionally specify an array of imagePullSecrets.
   ## Secrets must be manually created in the namespace.
   ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/
@@ -532,7 +532,7 @@ defaultInitContainers:
       repository: bitnami/os-shell
       tag: 12-debian-12-r50
       digest: ""
-      pullPolicy: IfNotPresent
+      pullPolicy: Always
       ## Optionally specify an array of imagePullSecrets.
       ## Secrets must be manually created in the namespace.
       ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/
@@ -969,7 +969,7 @@ console:
     ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
     ## ref: https://kubernetes.io/docs/concepts/containers/images/#pre-pulled-images
     ##
-    pullPolicy: IfNotPresent
+    pullPolicy: Always
     ## Optionally specify an array of imagePullSecrets.
     ## Secrets must be manually created in the namespace.
     ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/

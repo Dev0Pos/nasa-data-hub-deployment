@@ -1,0 +1,79 @@
+# NASA ETL Go Application Configuration
+# This file inherits values from the main values.yaml file
+
+# Application configuration
+enabled: true
+
+# Image configuration (defaults, can be overridden by global values)
+image:
+  repository: ghcr.io/dev0pos/nasa-data-hub-etl
+  tag: "v1.0.1"
+  pullPolicy: Always
+
+# Replica count (not used for CronJob, but kept for compatibility)
+replicaCount: 1
+
+# Resource limits (defaults, can be overridden by global values)
+resources:
+  limits:
+    memory: "512Mi"
+    cpu: "500m"
+  requests:
+    memory: "256Mi"
+    cpu: "250m"
+
+# Health checks (not used for CronJob, but kept for compatibility)
+healthCheck:
+  enabled: true
+  path: "/health"
+  port: 8080
+  initialDelaySeconds: 30
+  periodSeconds: 10
+  timeoutSeconds: 5
+  failureThreshold: 3
+
+# CronJob configuration
+cronjob:
+  enabled: true
+  schedule: "0 * * * *"  # Co godzinę (cron format: minute hour day month weekday)
+  concurrencyPolicy: "Forbid"  # Nie uruchamiaj nowego joba jeśli poprzedni jeszcze działa
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 3
+
+# Service Account
+serviceAccount:
+  create: true
+  name: "nasa-etl"
+
+# Pod Security Context
+podSecurityContext:
+  runAsNonRoot: true
+  runAsUser: 1000
+  fsGroup: 1000
+
+# Container Security Context
+containerSecurityContext:
+  allowPrivilegeEscalation: false
+  readOnlyRootFilesystem: true
+  runAsNonRoot: true
+  runAsUser: 1000
+  capabilities:
+    drop:
+      - ALL
+
+# Node selector
+nodeSelector: {}
+
+# Tolerations
+tolerations: []
+
+# Affinity
+affinity: {}
+
+# Name override
+nameOverride: ""
+fullnameOverride: ""
+
+# NASA API configuration (inherited from global values)
+nasaApiKey: "DEMO_KEY"  # Will be overridden by global values
+nasaApiUrl: "https://eonet.gsfc.nasa.gov/api/v3"
