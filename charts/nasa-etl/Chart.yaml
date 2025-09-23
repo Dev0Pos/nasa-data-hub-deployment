@@ -1,0 +1,18 @@
+apiVersion: v2
+name: nasa-etl
+description: NASA EONET ETL Pipeline - Go application for processing NASA data
+type: application
+version: 0.1.0
+appVersion: "1.0.0"
+keywords:
+  - nasa
+  - etl
+  - go
+  - verticadb
+  - data-pipeline
+home: https://github.com/Dev0Pos/nasa-data-hub-etl
+sources:
+  - https://github.com/Dev0Pos/nasa-data-hub-etl
+maintainers:
+  - name: Łukasz Pośpiech
+    email: lukasz.pospiech@devpos.pl

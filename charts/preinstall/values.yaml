@@ -45,4 +45,4 @@ directories:
 minio:
   auth:
     rootUser: "admin"
-    rootPassword: "nasa-data-hub-2025"
+    rootPassword: "CHANGE_ME_MINIO_PASSWORD"

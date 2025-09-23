@@ -30,13 +30,13 @@ The following table lists the configurable parameters of the Metabase chart and 
 | `resources.limits.memory` | Memory resource limits | `2Gi` |
 | `resources.requests.cpu` | CPU resource requests | `500m` |
 | `resources.requests.memory` | Memory resource requests | `1Gi` |
-| `config.encryptionSecretKey` | Encryption secret key | `nasa-data-hub-metabase-secret-key-2024` |
+| `config.encryptionSecretKey` | Encryption secret key | `CHANGE_ME_METABASE_SECRET_KEY` |
 | `config.databaseType` | Application database type | `h2` |
 | `config.verticaHost` | Vertica database host | `nasa-data-hub-vertica-nasa-data-hub-vertica` |
 | `config.verticaPort` | Vertica database port | `5433` |
 | `config.verticaDatabase` | Vertica database name | `nasa_data` |
 | `config.verticaUser` | Vertica database user | `dbadmin` |
-| `config.verticaPassword` | Vertica database password | `vertica-password-2024` |
+| `config.verticaPassword` | Vertica database password | `CHANGE_ME_VERTICA_PASSWORD` |
 | `jdbc.autoDownload` | Auto-download JDBC driver | `true` |
 | `jdbc.downloadUrl` | JDBC driver download URL | `https://www.vertica.com/client_drivers/24.2.x/24.2.0-1/vertica-jdbc-24.2.0-1.jar` |
 | `initContainers.waitForVertica.enabled` | Enable wait for Vertica init container | `true` |
@@ -57,7 +57,7 @@ The chart automatically configures Vertica JDBC driver and provides connection d
 - **Port**: `5433`
 - **Database**: `nasa_data`
 - **Username**: `dbadmin`
-- **Password**: `vertica-password-2024`
+- **Password**: `CHANGE_ME_VERTICA_PASSWORD`
 
 ## Security
 

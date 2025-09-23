@@ -4,13 +4,14 @@ A comprehensive data analytics platform for NASA EONET data processing and visua
 
 ## Architecture
 
-The system consists of five main components deployed with proper dependency management:
+The system consists of six main components deployed with proper dependency management:
 
 1. **Preinstall** - Infrastructure setup (storage, directories, secrets)
 2. **VerticaDB Operator** - Manages Vertica database lifecycle
 3. **VerticaDB** - Analytical database (data warehouse) for processed data
 4. **MinIO** - Object storage (data lake) for raw data
 5. **Metabase** - Data visualization and dashboard creation tool
+6. **NASA ETL** - CronJob for processing NASA EONET data every hour
 
 ## Features
 
@@ -76,6 +77,19 @@ kubectl get pvc -n nasa-data-hub
 | `verticadb.enabled` | Enable/disable Vertica | `true` |
 | `metabase.enabled` | Enable/disable Metabase | `true` |
 | `metabase.setupDatabase` | Enable/disable Metabase setup job | `true` |
+| `nasa-etl.enabled` | Enable/disable NASA ETL CronJob | `true` |
+
+### NASA API Key Configuration
+
+**REQUIRED**: You must configure your NASA API key before deployment:
+
+1. Get your API key from [https://api.nasa.gov/](https://api.nasa.gov/)
+2. Set it in `values.yaml`:
+   ```yaml
+   global:
+     nasaEtl:
+       nasaApiKey: "YOUR_NASA_API_KEY_HERE"
+   ```
 
 ### Global Configuration
 
@@ -109,7 +123,7 @@ kubectl port-forward svc/nasa-data-hub-minio-console 9090:9090 -n nasa-data-hub
 
 Open http://localhost:9090 in your browser
 - Username: `admin`
-- Password: `nasa-data-hub-2025`
+- Password: `CHANGE_ME_MINIO_PASSWORD`
 
 ### Metabase
 
@@ -121,9 +135,32 @@ Open http://localhost:3000 in your browser
 
 **Login Credentials:**
 - Email: `admin@nasa-data-hub.com`
-- Password: `NasaDataHub2024!`
+- Password: `CHANGE_ME_METABASE_PASSWORD`
 
 **Note:** Metabase is automatically configured during deployment with Vertica database connection. No manual setup required.
+
+### NASA ETL CronJob
+
+```bash
+# Check CronJob status
+kubectl get cronjobs -n nasa-data-hub
+
+# View CronJob logs
+kubectl logs -n nasa-data-hub -l app.kubernetes.io/name=nasa-etl
+
+# Manually trigger CronJob
+kubectl create job --from=cronjob/nasa-data-hub-nasa-etl-cronjob manual-etl-run -n nasa-data-hub
+```
+
+**Schedule:** The ETL process runs automatically every hour (configurable in `values.yaml`)
+
+**Features:**
+- Automatic data fetching from NASA EONET API
+- Data processing and transformation
+- Storage in VerticaDB for analytics
+- Error handling and retry logic
+
+**Note:** The ETL application automatically processes NASA EONET data and loads it into VerticaDB.
 
 ### Vertica Database
 
@@ -305,6 +342,7 @@ nasa-data-hub-deployment/
 ├── charts/                    # Sub-charts for components
 │   ├── metabase/             # Metabase Helm chart
 │   ├── minio/                # MinIO Helm chart
+│   ├── nasa-etl/             # NASA ETL Go app Helm chart
 │   ├── verticadb/            # VerticaDB Helm chart
 │   ├── verticadb-operator/   # Vertica Operator chart
 │   └── preinstall/           # Preinstall resources
@@ -316,12 +354,19 @@ nasa-data-hub-deployment/
 └── README.md                 # This file
 ```
 
+## Prerequisites
+
+Before deploying, you need to:
+
+1. **Get NASA API Key** - Register at [https://api.nasa.gov/](https://api.nasa.gov/) to get your API key
+2. **Configure API Key** - Set `global.nasaEtl.nasaApiKey` in `values.yaml`
+
 ## Next Steps
 
-1. **Access Metabase** - Login with provided credentials to create dashboards
-2. **Configure your NASA API key** - For the ETL application
-3. **Set up ingress** - For external access to services
-4. **Deploy your Go ETL application** - Connect to VerticaDB for data processing
+1. **Set NASA API Key** - Configure your API key in `values.yaml`
+2. **Deploy** - Run `./deploy.sh` to deploy the complete system
+3. **Access Metabase** - Login with provided credentials to create dashboards
+4. **Set up ingress** - For external access to services
 5. **Create dashboards** - Use Metabase to visualize NASA EONET data
 
 ## Recent Improvements
@@ -331,6 +376,8 @@ nasa-data-hub-deployment/
 - **Centralized configuration** - All values managed from main values.yaml
 - **Improved deployment speed** - Removed unnecessary timeouts and waits
 - **Better cleanup** - Automatic MinIO bucket cleanup prevents deployment issues
+- **Added NASA ETL CronJob** - Scheduled ETL pipeline for NASA EONET data processing
+- **Integrated Go application** - Seamless integration with existing infrastructure
 
 ## Support
 

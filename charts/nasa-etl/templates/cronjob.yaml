@@ -1,0 +1,100 @@
+{{- if .Values.enabled }}
+{{- if not .Values.nasaApiKey }}
+{{- fail "NASA API key is required! Please set nasa-etl.nasaApiKey in values.yaml" }}
+{{- end }}
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: {{ include "nasa-etl.fullname" . }}-cronjob
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "nasa-etl.labels" . | nindent 4 }}
+    app.kubernetes.io/component: cronjob
+spec:
+  schedule: "{{ .Values.cronjob.schedule | default "0 * * * *" }}"
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 3
+  jobTemplate:
+    spec:
+      template:
+        metadata:
+          labels:
+            {{- include "nasa-etl.selectorLabels" . | nindent 12 }}
+            app.kubernetes.io/component: cronjob
+        spec:
+          serviceAccountName: {{ include "nasa-etl.serviceAccountName" . }}
+          securityContext:
+            {{- toYaml .Values.podSecurityContext | nindent 12 }}
+          initContainers:
+          - name: wait-for-dependencies
+            image: busybox:1.35
+            command: ['sh', '-c']
+            args:
+            - |
+              echo "Waiting for VerticaDB to be ready..."
+              until nc -z nasa-data-hub-verticadb-nasa-data-hub-verticadb 5433; do
+                echo "VerticaDB not ready, waiting..."
+                sleep 5
+              done
+              echo "VerticaDB is ready!"
+              
+              echo "Waiting for Metabase to be ready..."
+              until nc -z nasa-data-hub-metabase 3000; do
+                echo "Metabase not ready, waiting..."
+                sleep 5
+              done
+              echo "Metabase is ready!"
+              
+              echo "All dependencies are ready!"
+          containers:
+          - name: nasa-etl
+            image: "{{ .Values.image.repository | default "ghcr.io/dev0pos/nasa-data-hub-etl" }}:{{ .Values.image.tag | default "v1.0.1" }}"
+            imagePullPolicy: {{ .Values.image.pullPolicy | default "Always" }}
+            env:
+            - name: DATABASE_HOST
+              value: "nasa-data-hub-verticadb-nasa-data-hub-verticadb"
+            - name: DATABASE_PORT
+              value: "5433"
+            - name: DATABASE_NAME
+              value: "nasa_data"
+            - name: DATABASE_USERNAME
+              value: "dbadmin"
+            - name: DATABASE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "nasa-etl.fullname" . }}-secret
+                  key: database-password
+            - name: NASA_API_URL
+              value: {{ .Values.nasaApiUrl | quote }}
+            - name: NASA_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "nasa-etl.fullname" . }}-secret
+                  key: nasa-api-key
+            - name: ETL_BATCH_SIZE
+              value: "1000"
+            - name: ETL_INTERVAL
+              value: "1h"
+            - name: ETL_RETRY_ATTEMPTS
+              value: "3"
+            - name: LOG_LEVEL
+              value: "info"
+            resources:
+              {{- toYaml .Values.resources | nindent 14 }}
+            securityContext:
+              {{- toYaml .Values.containerSecurityContext | nindent 14 }}
+          restartPolicy: OnFailure
+          {{- with .Values.nodeSelector }}
+          nodeSelector:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with .Values.affinity }}
+          affinity:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with .Values.tolerations }}
+          tolerations:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+{{- end }}
